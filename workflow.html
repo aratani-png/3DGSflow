@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3DGS Workflow</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #232633;
+    --border: #2e3244; --accent: #6c8aff; --accent2: #8b5cf6;
+    --green: #22c55e; --orange: #f59e0b; --text: #e2e8f0; --text2: #94a3b8;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* ===== Layout: sidebar + main ===== */
+  .app { display: flex; height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px; min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+  .sidebar-title {
+    padding: 20px 16px 6px;
+    font-size: 1.1rem; font-weight: 700;
+  }
+  .sidebar-sub {
+    padding: 0 16px 16px;
+    font-size: 0.72rem; color: var(--text2);
+  }
+  .sidebar-section {
+    padding: 10px 12px 4px;
+    font-size: 0.7rem; font-weight: 600;
+    color: var(--text2); text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .tool-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.12s;
+    user-select: none;
+    position: relative;
+  }
+  .tool-item:hover { background: var(--surface2); }
+  /* ホバーツールチップ */
+  .tool-item[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%; transform: translateY(-50%);
+    background: #1e2030; color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .tool-item.active {
+    background: var(--surface2);
+    border-left-color: var(--accent);
+  }
+  .tool-icon {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .tool-icon.blue { background: rgba(108,138,255,0.15); color: var(--accent); }
+  .tool-icon.purple { background: rgba(139,92,246,0.15); color: var(--accent2); }
+  .tool-icon.green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tool-icon.orange { background: rgba(245,158,11,0.15); color: var(--orange); }
+  .tool-label { font-size: 0.85rem; font-weight: 500; }
+  .tool-tag {
+    margin-left: auto;
+    font-size: 0.62rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+
+  /* Main content */
+  .main { flex: 1; overflow-y: auto; padding: 28px 36px; }
+  .main h2 { font-size: 1.3rem; margin-bottom: 4px; }
+  .main .desc { color: var(--text2); font-size: 0.85rem; margin-bottom: 20px; }
+
+  /* Panel (each tool's content) */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Shared settings bar */
+  .settings-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .settings-bar h3 { font-size: 0.9rem; margin-bottom: 10px; color: var(--text2); }
+
+  /* Form */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 3px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 0.75rem; color: var(--text2); font-weight: 500; }
+  input, select {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 7px 10px; color: var(--text);
+    font-size: 0.85rem; font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+  /* Code block */
+  .code-wrap { position: relative; margin: 12px 0; }
+  .code-block {
+    background: #0d0f14; border: 1px solid var(--border); border-radius: 6px;
+    padding: 12px 14px; padding-right: 70px;
+    font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 0.8rem;
+    overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+    color: var(--text); min-height: 40px;
+  }
+  .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text2); border-radius: 4px; padding: 3px 10px;
+    font-size: 0.72rem; cursor: pointer; transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .copy-btn.copied { background: var(--green); color: #000; border-color: var(--green); }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: #fff; border: none; border-radius: 6px;
+    padding: 8px 18px; font-size: 0.85rem; cursor: pointer;
+    transition: all 0.15s; font-weight: 500;
+  }
+  .btn:hover { filter: brightness(1.15); }
+  .btn-green { background: var(--green); color: #000; }
+  .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+
+  /* Note box */
+  .note {
+    background: #1c1f2e; border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 0 6px 6px 0;
+    font-size: 0.82rem; margin: 12px 0; color: var(--text2);
+  }
+  .note b { color: var(--text); }
+  .note-warn { border-left-color: var(--orange); }
+  .note-green { border-left-color: var(--green); }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* Folder manager */
+  .folder-list { margin: 12px 0; }
+  .folder-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    transition: background 0.1s;
+  }
+  .folder-row:hover { background: var(--surface2); }
+  .folder-row input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: var(--green);
+    cursor: pointer; flex-shrink: 0;
+  }
+  .folder-row .fname {
+    font-family: 'Cascadia Code', monospace;
+    font-size: 0.82rem; flex: 1;
+  }
+  .folder-row .fstatus {
+    font-size: 0.7rem; padding: 1px 8px;
+    border-radius: 3px; flex-shrink: 0;
+  }
+  .fstatus.exists { background: rgba(34,197,94,0.15); color: var(--green); }
+  .fstatus.missing { background: rgba(245,158,11,0.15); color: var(--orange); }
+  .folder-row .fdesc {
+    font-size: 0.72rem; color: var(--text2); min-width: 120px; text-align: right;
+  }
+  .folder-row .fbtn-del {
+    background: none; border: none; color: var(--text2);
+    cursor: pointer; font-size: 0.9rem; padding: 0 4px;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .folder-row:hover .fbtn-del { opacity: 1; }
+  .folder-row .fbtn-del:hover { color: var(--orange); }
+  .folder-add-row {
+    display: flex; gap: 8px; margin-top: 10px;
+  }
+  .folder-add-row input {
+    flex: 1; font-size: 0.82rem;
+    font-family: 'Cascadia Code', monospace;
+  }
+  .folder-add-row .add-desc {
+    width: 140px; font-size: 0.82rem;
+  }
+  .server-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.75rem; padding: 3px 10px; border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .server-badge.online { background: rgba(34,197,94,0.12); color: var(--green); }
+  .server-badge.offline { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .server-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .server-badge.online .server-dot { background: var(--green); }
+  .server-badge.offline .server-dot { background: #ef4444; }
+
+  /* Responsive */
+  @media (max-width: 800px) {
+    .app { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; min-width: 0; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border); }
+    .sidebar-title, .sidebar-sub { display: none; }
+    .sidebar-section { padding: 8px 8px 2px; }
+    .tool-item { padding: 8px 12px; border-left: none; border-bottom: 2px solid transparent; }
+    .tool-item.active { border-bottom-color: var(--accent); border-left-color: transparent; }
+    .main { padding: 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ===== Sidebar ===== -->
+<nav class="sidebar">
+  <div class="sidebar-title">3DGS Workflow</div>
+  <div class="sidebar-sub">360 Video &rarr; 3D Gaussian Splatting</div>
+
+  <div class="sidebar-section">全天球</div>
+  <div class="tool-item active" onclick="showPanel('project')" data-panel="project" data-tip="フォルダ構造の作成と設定の保存">
+    <div class="tool-icon blue">&#x1F4C1;</div>
+    <span class="tool-label">プロジェクト作成</span>
+  </div>
+  <div class="tool-item" onclick="showPanel('extract')" data-panel="extract" data-tip="360度動画から全天球フレームをimages_S/に抽出">
+    <div class="tool-icon blue">&#x1F3AC;</div>
+    <span class="tool-label">フレーム抽出</span>
+  </div>
+  <div class="tool-item" onclick="showPanel('metashape')" data-panel="metashape" data-tip="全天球画像のカメラ位置推定 → camera.xmlエクスポート">
+    <div class="tool-icon blue">&#x1F4F7;</div>
+    <span class="tool-label">Metashapeアライメント</span>
+    <span class="tool-tag">手動</span>
+  </div>
+
+  <div class="sidebar-section">透視投影</div>
+  <div class="tool-item" onclick="showPanel('split')" data-panel="split" data-tip="全天球を8方向の透視投影画像に分割 (FFmpeg v360)">
+    <div class="tool-icon purple">&#x1F5BC;</div>
+    <span class="tool-label">FFmpeg分割</span>
+  </div>
+  <div class="tool-item" onclick="showPanel('xmp')" data-panel="xmp" data-tip="camera.xmlから各画像の回転・位置をXMPに変換 (Pattern I)">
+    <div class="tool-icon green">&#x1F4DD;</div>
+    <span class="tool-label">XMP生成</span>
+    <span class="tool-tag">修正済</span>
+  </div>
+  <div class="tool-item" onclick="showPanel('rs')" data-panel="rs" data-tip="XMP付き画像をRSに読み込みexactモードでAlign">
+    <div class="tool-icon purple">&#x1F4E6;</div>
+    <span class="tool-label">RSアライメント</span>
+    <span class="tool-tag">手動</span>
+  </div>
+  <div class="tool-item" onclick="showPanel('train')" data-panel="train" data-tip="RSの結果をPostshot/gsplatに渡して3DGS生成">
+    <div class="tool-icon purple">&#x2728;</div>
+    <span class="tool-label">3DGSトレーニング</span>
+  </div>
+
+  <div class="sidebar-section">ツール</div>
+  <div class="tool-item" onclick="showPanel('diagnose')" data-panel="diagnose" data-tip="XMP座標変換の正しさを検証 (10パターン比較)">
+    <div class="tool-icon orange">&#x1F50D;</div>
+    <span class="tool-label">回転診断</span>
+  </div>
+  <div class="tool-item" onclick="showPanel('settings')" data-panel="settings" data-tip="パス設定・フォルダ構成管理">
+    <div class="tool-icon orange">&#x2699;</div>
+    <span class="tool-label">設定</span>
+  </div>
+</nav>
+
+<!-- ===== Main Content ===== -->
+<div class="main">
+
+  <!-- ==================== プロジェクト作成 ==================== -->
+  <div class="panel active" id="panel-project">
+    <h2>プロジェクト作成</h2>
+    <p class="desc">フォルダ構造を作成し、設定を保存します。</p>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>プロジェクト名</label>
+        <input type="text" id="project-name" placeholder="inokuchi_project02">
+      </div>
+      <div class="form-group">
+        <label>ベースパス</label>
+        <input type="text" id="base-path" placeholder="F:\202603_inokuchi\all\project02">
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-block" id="cmd-new">gs new
+# または gs prepare &lt;name&gt; でフォルダのみ作成</div>
+      <button class="copy-btn" onclick="copyCode('cmd-new')">Copy</button>
+    </div>
+
+    <div class="note">
+      <b>作成されるフォルダ:</b><br>
+      images_S/ (全天球), images_P/ (透視投影+XMP), Spherical/ (Metashape),
+      RS/ (RealityScan), tools/, output/, colmap/
+    </div>
+
+    <div class="code-wrap" style="margin-top:12px">
+      <div class="code-block">project/
+├─ images_S/        ← 全天球画像
+├─ images_P/        ← 透視投影画像 + XMP
+├─ Spherical/       ← Metashape出力 (camera.xml)
+├─ RS/              ← RealityScanプロジェクト
+├─ tools/           ← バッチスクリプト
+└─ output/          ← 最終出力</div>
+    </div>
+  </div>
+
+  <!-- ==================== フレーム抽出 ==================== -->
+  <div class="panel" id="panel-extract">
+    <h2>フレーム抽出</h2>
+    <p class="desc">360度動画から全天球フレームを images_S/ に抽出します。</p>
+
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>入力動画</label>
+        <input type="text" id="input-video" placeholder="F:\source\360video.mp4">
+      </div>
+      <div class="form-group">
+        <label>フレーム開始</label>
+        <input type="number" id="frame-start" value="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>フレーム終了</label>
+        <input type="number" id="frame-end" value="1000" min="0">
+      </div>
+      <div class="form-group">
+        <label>ステップ</label>
+        <input type="number" id="frame-step" value="1" min="1">
+      </div>
+      <div class="form-group">
+        <label>FPS</label>
+        <input type="number" id="fps" value="30" min="1">
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <button class="btn" onclick="generateExtractCmd()">コマンド生成</button>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-block" id="cmd-extract"><span style="color:var(--text2)">上のボタンでコマンドを生成</span></div>
+      <button class="copy-btn" onclick="copyCode('cmd-extract')">Copy</button>
+    </div>
+  </div>
+
+  <!-- ==================== Metashape ==================== -->
+  <div class="panel" id="panel-metashape">
+    <h2>Metashapeアライメント</h2>
+    <p class="desc">全天球画像をMetashapeでアライメントし、camera.xmlをエクスポートします。</p>
+
+    <div class="note">
+      <b>手順:</b><br>
+      1. Metashape &rarr; Workflow &rarr; Add Photos &rarr; images_S/ を追加<br>
+      2. Camera Type: <b>Spherical</b> に設定<br>
+      3. Workflow &rarr; Align Photos<br>
+      4. File &rarr; Export &rarr; Export Cameras &rarr; <b>Spherical/camera.xml</b>
+    </div>
+
+    <div class="form-group full" style="margin-top:12px">
+      <label>camera.xml パス (他ツールで参照)</label>
+      <input type="text" id="xml-path" placeholder="F:\...\Spherical\camera.xml">
+    </div>
+
+    <div class="note note-warn" style="margin-top:12px">
+      <b>座標系:</b> Metashapeは Z-up / c2w / OpenCVカメラ座標系。<br>
+      XMP生成時にRSの Y-up / OpenGL座標系に自動変換されます。
+    </div>
+  </div>
+
+  <!-- ==================== FFmpeg分割 ==================== -->
+  <div class="panel" id="panel-split">
+    <h2>FFmpeg分割</h2>
+    <p class="desc">全天球画像を複数方向の透視投影画像に分割します。</p>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>方向数</label>
+        <select id="directions">
+          <option value="8" selected>8方向 (45度間隔)</option>
+          <option value="6">6方向 (60度間隔)</option>
+          <option value="4">4方向 (90度間隔)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>FOV (度)</label>
+        <input type="number" id="fov" value="90" min="30" max="180">
+      </div>
+      <div class="form-group">
+        <label>出力幅 (px)</label>
+        <input type="number" id="out-width" value="1920">
+      </div>
+      <div class="form-group">
+        <label>出力高さ (px)</label>
+        <input type="number" id="out-height" value="1920">
+      </div>
+      <div class="form-group full">
+        <label>入力フォルダ (images_S/)</label>
+        <input type="text" id="input-spherical-dir" placeholder="F:\...\images_S">
+      </div>
+      <div class="form-group full">
+        <label>出力フォルダ (images_P/)</label>
+        <input type="text" id="output-perspective-dir" placeholder="F:\...\images_P">
+      </div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:8px;">
+      <button class="btn" onclick="generateSplitCmd()">FFmpegコマンド例</button>
+      <button class="btn btn-secondary" onclick="generateSplitBat()">BATファイル生成</button>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-block" id="cmd-split"><span style="color:var(--text2)">上のボタンでコマンドを生成</span></div>
+      <button class="copy-btn" onclick="copyCode('cmd-split')">Copy</button>
+    </div>
+
+    <div class="note">
+      <b>命名規則:</b> {フレーム番号}_{方向角度}.jpg<br>
+      例: 0001_000.jpg, 0001_045.jpg, ... 0001_315.jpg<br>
+      <b>CLIからも実行可:</b> <code>gs split &lt;name&gt; -i &lt;video&gt;</code>
+    </div>
+  </div>
+
+  <!-- ==================== XMP生成 ==================== -->
+  <div class="panel" id="panel-xmp">
+    <h2>XMP生成</h2>
+    <p class="desc">Metashapeのcamera.xmlから各透視投影画像のXMPサイドカーファイルを生成します。</p>
+
+    <div class="note note-green">
+      <b>座標変換 (Pattern I) 修正済み:</b><br>
+      回転: R_rs = [ R[0], &minus;R[2], R[1] ] &nbsp;(Z-up c2w &rarr; Y-up c2w + カメラフレーム変換)<br>
+      位置: (x, y, z) &rarr; (x, &minus;z, y)<br>
+      RSの正解データと照合済み (roll誤差 &lt; 0.8度)
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>camera.xml</label>
+        <input type="text" id="xmp-xml-path" placeholder="F:\...\Spherical\camera.xml">
+      </div>
+      <div class="form-group full">
+        <label>画像フォルダ (images_P/)</label>
+        <input type="text" id="xmp-image-dir" placeholder="F:\...\images_P">
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <button class="btn btn-green" onclick="generateXmpCmd()">コマンド生成</button>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-block" id="cmd-xmp"><span style="color:var(--text2)">上のボタンでコマンドを生成</span></div>
+      <button class="copy-btn" onclick="copyCode('cmd-xmp')">Copy</button>
+    </div>
+
+    <hr>
+    <details>
+      <summary style="cursor:pointer; color:var(--text2); font-size:0.85rem;">座標変換の詳細</summary>
+      <div class="note" style="margin-top:8px">
+        <b>Metashape座標系:</b> Z-up, c2w (camera-to-world), OpenCVカメラ (X右, Y下, Z前方)<br>
+        <b>RS座標系:</b> Y-up, c2w, OpenGL-likeカメラ (X右, Y上, Z後方)<br><br>
+        <b>変換行列 S':</b> [[1,0,0], [0,0,-1], [0,1,0]]<br>
+        1. c2w回転にyaw回転を適用: R = R_c2w @ R_yaw(angle)<br>
+        2. row0 = R[0] (そのまま)<br>
+        3. row1 = -R[2] (Z-upのZ軸反転)<br>
+        4. row2 = R[1] (Z-upのY軸)
+      </div>
+    </details>
+  </div>
+
+  <!-- ==================== RSアライメント ==================== -->
+  <div class="panel" id="panel-rs">
+    <h2>RealityScanアライメント</h2>
+    <p class="desc">XMP付き画像をRSに読み込み、exactモードでアライメントします。</p>
+
+    <div class="note">
+      <b>手順:</b><br>
+      1. RS &rarr; New Project &rarr; images_P/ を読み込み (XMP自動検出)<br>
+      2. Align Settings &rarr; Use Camera Metadata: <b>Exact</b><br>
+      3. Align Photos 実行<br>
+      4. 8方向が正しく展開されるか確認<br>
+      5. Registration (.csv) + Point Cloud (.ply) エクスポート
+    </div>
+
+    <div class="note note-warn">
+      <b>画像が多い場合:</b><br>
+      4分割してRSで個別Align → 後でMergeすると効率的です。
+    </div>
+  </div>
+
+  <!-- ==================== 3DGSトレーニング ==================== -->
+  <div class="panel" id="panel-train">
+    <h2>3DGSトレーニング</h2>
+    <p class="desc">RSのアライメント結果を使って3D Gaussian Splattingを実行します。</p>
+
+    <div class="note">
+      RSからエクスポートした Registration (.csv) と Point Cloud (.ply) を<br>
+      Postshot や gsplat などに渡してトレーニング。
+    </div>
+  </div>
+
+  <!-- ==================== 回転診断 ==================== -->
+  <div class="panel" id="panel-diagnose">
+    <h2>回転診断ツール</h2>
+    <p class="desc">XMPの座標変換が正しいか診断するスクリプト。10パターンの変換を試し、RSの正解データと比較します。</p>
+
+    <div class="code-wrap">
+      <div class="code-block" id="cmd-diag">cd F:\3DGS
+python tools/diagnose_rotation.py</div>
+      <button class="copy-btn" onclick="copyCode('cmd-diag')">Copy</button>
+    </div>
+
+    <div class="note note-green">
+      <b>結果:</b> Pattern I (c2w + 行1,2反転) がRSの正解パターンと一致。<br>
+      roll差分誤差: &lt; 0.1度 / 絶対roll誤差: &lt; 0.8度
+    </div>
+
+    <hr>
+    <h3 style="font-size:0.9rem; margin-bottom:8px;">テスト済みパターン</h3>
+    <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
+      <tr style="border-bottom:1px solid var(--border);">
+        <th style="text-align:left; padding:6px;">パターン</th>
+        <th style="text-align:left; padding:6px;">説明</th>
+        <th style="text-align:right; padding:6px;">roll誤差</th>
+      </tr>
+      <tr><td style="padding:4px 6px;">A</td><td>c2w + OpenCV (旧スクリプト)</td><td style="text-align:right; color:var(--orange);">90.0度</td></tr>
+      <tr><td style="padding:4px 6px;">B</td><td>c2w + OpenGL (列反転)</td><td style="text-align:right; color:var(--orange);">90.0度</td></tr>
+      <tr><td style="padding:4px 6px;">E</td><td>c2w + OpenCV + 負yaw</td><td style="text-align:right; color:var(--green);">0.07度</td></tr>
+      <tr style="background:rgba(34,197,94,0.08);">
+        <td style="padding:4px 6px;"><b>I</b></td>
+        <td><b>c2w + 行1,2反転 (採用)</b></td>
+        <td style="text-align:right; color:var(--green);"><b>0.06度</b></td>
+      </tr>
+    </table>
+    <p style="font-size:0.75rem; color:var(--text2); margin-top:6px;">
+      Pattern I は絶対rollも一致 (EはΔrollのみ一致、絶対値は90度ずれ)
+    </p>
+  </div>
+
+  <!-- ==================== 設定 ==================== -->
+  <div class="panel" id="panel-settings">
+    <h2>設定</h2>
+    <p class="desc">各ツールで共有する設定。ブラウザのlocalStorageに自動保存されます。</p>
+
+    <div id="server-status"></div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>FFmpegパス</label>
+        <input type="text" id="ffmpeg-path" value="ffmpeg">
+      </div>
+      <div class="form-group">
+        <label>Pythonパス</label>
+        <input type="text" id="python-path" value="python">
+      </div>
+      <div class="form-group full">
+        <label>gs-manager パス</label>
+        <input type="text" id="gs-path" value="F:\3DGS">
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- フォルダ構成 -->
+    <h3 style="font-size:1rem; margin-bottom:4px;">フォルダ構成</h3>
+    <p style="font-size:0.78rem; color:var(--text2); margin-bottom:8px;">
+      チェックを入れるとベースパス下にフォルダを作成します。
+    </p>
+
+    <div class="form-group full" style="margin-bottom:10px">
+      <label>ベースパス</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="folder-base" placeholder="F:\202603_inokuchi\all\project02" style="flex:1"
+               oninput="saveState(); folderManager.refresh();">
+        <button class="btn btn-secondary" onclick="folderManager.refresh()" style="white-space:nowrap">状態確認</button>
+      </div>
+    </div>
+
+    <div class="folder-list" id="folder-list">
+      <!-- JS renders here -->
+    </div>
+
+    <!-- +追加 -->
+    <div class="folder-add-row">
+      <input type="text" id="folder-add-name" placeholder="フォルダ名 (例: meshes)">
+      <input type="text" id="folder-add-desc" class="add-desc" placeholder="説明 (任意)">
+      <button class="btn btn-secondary" onclick="folderManager.addCustom()" style="white-space:nowrap">+ 追加</button>
+    </div>
+
+    <hr>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-green" onclick="folderManager.createChecked()">チェック済みを一括作成</button>
+      <button class="btn btn-secondary" onclick="if(confirm('保存データをリセットしますか？')){localStorage.removeItem('3dgs_wf');location.reload();}">設定リセット</button>
+    </div>
+
+    <div class="note" style="margin-top:16px">
+      <b>サーバーモード:</b> <code>python workflow_server.py</code> を実行してから<br>
+      <code>http://localhost:8050</code> を開くと、チェックで実際にフォルダが作成されます。<br>
+      HTMLを直接開いた場合はコマンド生成のみ。
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ============================================================
+// Panel switching
+// ============================================================
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tool-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const item = document.querySelector(`.tool-item[data-panel="${id}"]`);
+  if (item) item.classList.add('active');
+  saveState();
+}
+
+// ============================================================
+// Copy
+// ============================================================
+function copyCode(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.closest('.code-wrap').querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// ============================================================
+// Command generators
+// ============================================================
+function v(id) { return document.getElementById(id)?.value || ''; }
+
+function generateExtractCmd() {
+  const video = v('input-video') || '<input_video>';
+  const bp = v('base-path') || '<base_path>';
+  const start = v('frame-start'), end = v('frame-end'), step = v('frame-step');
+  const total = Math.floor((end - start) / step) + 1;
+  document.getElementById('cmd-extract').textContent =
+    `ffmpeg -i "${video}" -vf "select=not(mod(n\\,${step}))" -vsync vfr -q:v 2 "${bp}\\images_S\\%04d.jpg"\n\n# フレーム ${start}〜${end}、ステップ${step}、総数: ${total}`;
+}
+
+function generateSplitCmd() {
+  const inDir = v('input-spherical-dir') || '<images_S>';
+  const outDir = v('output-perspective-dir') || '<images_P>';
+  const dirs = parseInt(v('directions'));
+  const fov = v('fov'), w = v('out-width'), h = v('out-height');
+  const ff = v('ffmpeg-path') || 'ffmpeg';
+  const step = 360 / dirs;
+  let cmd = '# 全天球1枚に対するFFmpeg分割コマンド例:\n\n';
+  for (let i = 0; i < dirs; i++) {
+    const yaw = Math.round(step * i);
+    const a = String(yaw).padStart(3, '0');
+    cmd += `"${ff}" -i "${inDir}\\0001.jpg" -vf "v360=equirect:flat:h_fov=${fov}:v_fov=${fov}:yaw=${yaw}:pitch=0:roll=0,scale=${w}:${h}" -frames:v 1 -q:v 2 "${outDir}\\0001_${a}.jpg"\n`;
+  }
+  cmd += '\n# 全フレーム: gs split <name> -i <video>';
+  document.getElementById('cmd-split').textContent = cmd;
+}
+
+function generateSplitBat() {
+  const inDir = v('input-spherical-dir') || '<images_S>';
+  const outDir = v('output-perspective-dir') || '<images_P>';
+  const dirs = parseInt(v('directions'));
+  const fov = v('fov'), w = v('out-width'), h = v('out-height');
+  const ff = v('ffmpeg-path') || 'ffmpeg';
+  const start = parseInt(v('frame-start')) || 0;
+  const end = parseInt(v('frame-end')) || 10;
+  const step = parseInt(v('frame-step')) || 1;
+  const aStep = 360 / dirs;
+  let bat = '@echo off\necho Processing...\n\n';
+  for (let f = start; f <= Math.min(end, start + 5 * step); f += step) {
+    const lbl = String(f + 1).padStart(4, '0');
+    for (let i = 0; i < dirs; i++) {
+      const yaw = Math.round(aStep * i);
+      const a = String(yaw).padStart(3, '0');
+      bat += `"${ff}" -i "${inDir}\\${lbl}.jpg" -vf "v360=equirect:flat:h_fov=${fov}:v_fov=${fov}:yaw=${yaw}:pitch=0:roll=0,scale=${w}:${h}" -frames:v 1 -q:v 2 "${outDir}\\${lbl}_${a}.jpg"\n`;
+    }
+    bat += '\n';
+  }
+  bat += 'REM ... (残りのフレームも同様)\necho Done.\npause';
+  document.getElementById('cmd-split').textContent = bat;
+}
+
+function generateXmpCmd() {
+  const name = v('project-name') || '<project_name>';
+  const xml = v('xmp-xml-path') || v('xml-path') || '<camera.xml>';
+  const img = v('xmp-image-dir') || '<images_P>';
+  const fov = v('fov') || '90', w = v('out-width') || '1920', h = v('out-height') || '1920';
+  const gs = v('gs-path') || 'F:\\3DGS';
+  let cmd = `cd ${gs}\n`;
+  cmd += `PYTHONPATH=src python -c "from gs_manager.converters.xml_to_xmp import generate_xmp, XmpParams; `;
+  cmd += `n = generate_xmp(XmpParams(xml_path=r'${xml}', image_dir=r'${img}', fov_deg=${fov}, img_width=${w}, img_height=${h})); `;
+  cmd += `print(f'{n} XMP files generated')"`;
+  cmd += `\n\n# gs route (config設定済みの場合):\n# gs route ${name} --xml "${xml}" --images "${img}"`;
+  document.getElementById('cmd-xmp').textContent = cmd;
+}
+
+// ============================================================
+// Persistence
+// ============================================================
+function saveState() {
+  const s = {};
+  const activePanel = document.querySelector('.panel.active');
+  if (activePanel) s._panel = activePanel.id.replace('panel-', '');
+  document.querySelectorAll('input, select').forEach(el => {
+    if (el.id) s[el.id] = el.value;
+  });
+  localStorage.setItem('3dgs_wf', JSON.stringify(s));
+}
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('3dgs_wf') || '{}');
+    document.querySelectorAll('input, select').forEach(el => {
+      if (el.id && s[el.id] !== undefined) el.value = s[el.id];
+    });
+    if (s._panel) showPanel(s._panel);
+  } catch(e) {}
+}
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('change', saveState);
+  el.addEventListener('input', saveState);
+});
+loadState();
+
+// ============================================================
+// Folder Manager
+// ============================================================
+const folderManager = (() => {
+  // デフォルトフォルダ定義
+  const DEFAULT_FOLDERS = [
+    { name: 'images_S',        desc: '全天球画像' },
+    { name: 'images_P',        desc: '透視投影+XMP' },
+    { name: 'Spherical',       desc: 'Metashape出力' },
+    { name: 'RS',              desc: 'RealityScan' },
+    { name: 'tools',           desc: 'スクリプト' },
+    { name: 'output',          desc: '最終出力' },
+    { name: 'output/point_cloud', desc: '点群データ' },
+    { name: 'output/cameras',  desc: 'カメラデータ' },
+    { name: 'colmap',          desc: 'COLMAP' },
+    { name: 'colmap/sparse',   desc: 'Sparse' },
+    { name: 'colmap/dense',    desc: 'Dense' },
+  ];
+
+  let serverOnline = false;
+  let folders = []; // { name, desc, checked, exists }
+
+  function getBase() {
+    return document.getElementById('folder-base')?.value || document.getElementById('base-path')?.value || '';
+  }
+
+  function loadFolders() {
+    try {
+      const s = JSON.parse(localStorage.getItem('3dgs_wf') || '{}');
+      const custom = s._customFolders || [];
+      const checks = s._folderChecks || {};
+      folders = DEFAULT_FOLDERS.map(f => ({
+        ...f, custom: false,
+        checked: checks[f.name] !== undefined ? checks[f.name] : true,
+        exists: false,
+      }));
+      custom.forEach(c => {
+        if (!folders.find(f => f.name === c.name)) {
+          folders.push({
+            name: c.name, desc: c.desc || '', custom: true,
+            checked: checks[c.name] !== undefined ? checks[c.name] : true,
+            exists: false,
+          });
+        }
+      });
+    } catch(e) {
+      folders = DEFAULT_FOLDERS.map(f => ({ ...f, custom: false, checked: true, exists: false }));
+    }
+  }
+
+  function saveFolders() {
+    const s = JSON.parse(localStorage.getItem('3dgs_wf') || '{}');
+    s._customFolders = folders.filter(f => f.custom).map(f => ({ name: f.name, desc: f.desc }));
+    const checks = {};
+    folders.forEach(f => { checks[f.name] = f.checked; });
+    s._folderChecks = checks;
+    localStorage.setItem('3dgs_wf', JSON.stringify(s));
+  }
+
+  async function checkServer() {
+    try {
+      const r = await fetch('/api/ls?path=.', { signal: AbortSignal.timeout(1000) });
+      serverOnline = r.ok;
+    } catch(e) {
+      serverOnline = false;
+    }
+    const el = document.getElementById('server-status');
+    if (el) {
+      if (serverOnline) {
+        el.innerHTML = '<div class="server-badge online"><div class="server-dot"></div>サーバー接続中 — フォルダ操作可能</div>';
+      } else {
+        el.innerHTML = '<div class="server-badge offline"><div class="server-dot"></div>サーバー未接続 — python workflow_server.py を実行してください</div>';
+      }
+    }
+  }
+
+  async function checkExistence() {
+    const base = getBase();
+    if (!base || !serverOnline) return;
+    try {
+      const r = await fetch(`/api/ls?path=${encodeURIComponent(base)}`);
+      const data = await r.json();
+      if (!data.exists) {
+        folders.forEach(f => f.exists = false);
+        return;
+      }
+      const dirSet = new Set(data.children.map(c => c.name));
+      // For nested folders, also check parent
+      folders.forEach(f => {
+        const parts = f.name.split('/');
+        if (parts.length === 1) {
+          f.exists = dirSet.has(f.name);
+        } else {
+          // assume first level exists if in dirSet
+          f.exists = false; // will check via separate ls
+        }
+      });
+      // Check nested folders
+      const nested = folders.filter(f => f.name.includes('/'));
+      for (const f of nested) {
+        try {
+          const parent = f.name.split('/').slice(0, -1).join('/');
+          const rr = await fetch(`/api/ls?path=${encodeURIComponent(base + '/' + parent)}`);
+          const dd = await rr.json();
+          if (dd.exists) {
+            const childName = f.name.split('/').pop();
+            f.exists = dd.children.some(c => c.name === childName);
+          }
+        } catch(e) {}
+      }
+    } catch(e) {}
+  }
+
+  function render() {
+    const list = document.getElementById('folder-list');
+    if (!list) return;
+    list.innerHTML = '';
+    folders.forEach((f, i) => {
+      const row = document.createElement('div');
+      row.className = 'folder-row';
+      const statusClass = f.exists ? 'exists' : 'missing';
+      const statusText = f.exists ? '存在' : '未作成';
+      row.innerHTML = `
+        <input type="checkbox" ${f.checked ? 'checked' : ''} onchange="folderManager.toggle(${i}, this.checked)">
+        <span class="fname">${f.name}/</span>
+        <span class="fstatus ${statusClass}">${statusText}</span>
+        <span class="fdesc">${f.desc}</span>
+        ${f.custom ? `<button class="fbtn-del" onclick="folderManager.remove(${i})" title="削除">&times;</button>` : '<span style="width:22px"></span>'}
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  async function createOne(folderName) {
+    const base = getBase();
+    if (!base) { alert('ベースパスを入力してください'); return false; }
+    if (!serverOnline) { alert('サーバーが起動していません。\npython workflow_server.py を実行してください。'); return false; }
+    const fullPath = base.replace(/\//g, '\\') + '\\' + folderName.replace(/\//g, '\\');
+    try {
+      const r = await fetch('/api/mkdir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paths: [fullPath] }),
+      });
+      const data = await r.json();
+      return data.created && data.created.length > 0;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  return {
+    async init() {
+      loadFolders();
+      await checkServer();
+      await checkExistence();
+      render();
+    },
+
+    async refresh() {
+      await checkServer();
+      await checkExistence();
+      render();
+    },
+
+    async toggle(index, checked) {
+      folders[index].checked = checked;
+      saveFolders();
+      // チェックONかつ未作成→作成
+      if (checked && !folders[index].exists && serverOnline) {
+        const ok = await createOne(folders[index].name);
+        if (ok) folders[index].exists = true;
+        render();
+      }
+    },
+
+    remove(index) {
+      if (!folders[index].custom) return;
+      folders.splice(index, 1);
+      saveFolders();
+      render();
+    },
+
+    addCustom() {
+      const nameEl = document.getElementById('folder-add-name');
+      const descEl = document.getElementById('folder-add-desc');
+      const name = nameEl.value.trim().replace(/\\/g, '/').replace(/^\/|\/$/g, '');
+      const desc = descEl.value.trim();
+      if (!name) return;
+      if (folders.find(f => f.name === name)) {
+        alert('同名のフォルダが既にあります');
+        return;
+      }
+      folders.push({ name, desc, custom: true, checked: true, exists: false });
+      saveFolders();
+      nameEl.value = '';
+      descEl.value = '';
+      render();
+    },
+
+    async createChecked() {
+      const base = getBase();
+      if (!base) { alert('ベースパスを入力してください'); return; }
+      if (!serverOnline) { alert('サーバーが起動していません。\npython workflow_server.py を実行してください。'); return; }
+      const toCreate = folders.filter(f => f.checked && !f.exists);
+      if (toCreate.length === 0) { alert('作成するフォルダがありません'); return; }
+      const paths = toCreate.map(f => base.replace(/\//g, '\\') + '\\' + f.name.replace(/\//g, '\\'));
+      try {
+        const r = await fetch('/api/mkdir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths }),
+        });
+        const data = await r.json();
+        if (data.created) {
+          await folderManager.refresh();
+          alert(`${data.created.length} フォルダを作成しました`);
+        }
+      } catch(e) {
+        alert('エラー: ' + e.message);
+      }
+    },
+  };
+})();
+
+// Init folder manager when settings panel is shown
+const _origShowPanel = showPanel;
+showPanel = function(id) {
+  _origShowPanel(id);
+  if (id === 'settings') folderManager.init();
+};
+
+// Also sync base-path ↔ folder-base
+document.getElementById('base-path')?.addEventListener('input', () => {
+  const fb = document.getElementById('folder-base');
+  if (fb && !fb.value) fb.value = document.getElementById('base-path').value;
+});
+document.getElementById('folder-base')?.addEventListener('input', () => {
+  const bp = document.getElementById('base-path');
+  if (bp) bp.value = document.getElementById('folder-base').value;
+});
+
+// Auto-init if starting on settings
+if (document.getElementById('panel-settings')?.classList.contains('active')) {
+  folderManager.init();
+}
+</script>
+</body>
+</html>

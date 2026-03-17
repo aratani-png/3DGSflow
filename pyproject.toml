@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gs-manager"
+version = "0.1.0"
+description = "3DGS Workflow Manager - 360°動画→3DGS変換ワークフロー管理CLI"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.0",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+gs = "gs_manager.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gs_manager"]
