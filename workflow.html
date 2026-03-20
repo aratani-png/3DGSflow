@@ -465,8 +465,11 @@
       <h3>FFmpegコマンド</h3>
       <div class="form-grid">
         <div class="form-group full">
-          <label>入力動画パス</label>
-          <input type="text" id="s1-video" placeholder="F:\source\360video.mp4">
+          <label>入力動画パス（ファイルをここにドラッグ＆ドロップ可能）</label>
+          <div id="s1-video-drop" style="position:relative;">
+            <input type="text" id="s1-video" placeholder="F:\source\360video.mp4" style="width:100%;">
+            <div id="s1-video-dropzone" style="display:none; position:absolute; inset:0; background:rgba(108,138,255,0.15); border:2px dashed var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; pointer-events:none; font-size:0.85rem; color:var(--accent);">ドロップしてパスを挿入</div>
+          </div>
         </div>
         <div class="form-group full">
           <label>出力フォルダ (images_S/)</label>
@@ -1194,6 +1197,40 @@ function genStep3Cmd() {
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
   selectSplitPattern(currentSplitPattern);
+
+  // Drag & drop for file path inputs
+  function setupFileDrop(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const container = input.closest('.form-group') || input.parentElement;
+
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      container.style.outline = '2px dashed var(--accent)';
+      container.style.outlineOffset = '-2px';
+    });
+    container.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      container.style.outline = 'none';
+    });
+    container.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      container.style.outline = 'none';
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        // Use webkitRelativePath or name with path
+        const path = file.path || file.name;
+        input.value = path;
+        input.dispatchEvent(new Event('input'));
+        saveState();
+      }
+    });
+  }
+
+  // Setup drag & drop on all file path inputs
+  ['s1-video', 's1-output', 's3-input', 's3-output'].forEach(setupFileDrop);
 });
 
 // ============================================================
