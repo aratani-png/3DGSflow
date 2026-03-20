@@ -480,8 +480,13 @@
           <input type="number" id="s1-step" value="1" min="1">
         </div>
         <div class="form-group">
-          <label>JPG品質 (1-31, 2が推奨)</label>
-          <input type="number" id="s1-quality" value="2" min="1" max="31">
+          <label>JPG品質 (1=低画質 〜 10=最高画質)</label>
+          <input type="range" id="s1-quality" value="10" min="1" max="10" step="1" oninput="document.getElementById('s1-quality-val').textContent=this.value" style="width:100%;">
+          <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text3);">
+            <span>1 (低)</span>
+            <span id="s1-quality-val" style="color:var(--accent); font-weight:700; font-size:0.85rem;">10</span>
+            <span>10 (最高)</span>
+          </div>
         </div>
       </div>
       <div style="margin-top:10px">
@@ -1091,14 +1096,17 @@ function genStep1Cmd() {
   const video = v('s1-video') || '<input_video.mp4>';
   const output = v('s1-output') || '<images_S>';
   const step = v('s1-step') || '1';
-  const q = v('s1-quality') || '2';
+  const uiQuality = parseInt(v('s1-quality')) || 10;
+  // UI: 1(低)〜10(最高) → FFmpeg -q:v: 31(低)〜1(最高)
+  const ffmpegQ = Math.round(1 + (10 - uiQuality) * 30 / 9);
   let cmd = '';
   if (step === '1') {
-    cmd = `ffmpeg -i "${video}" -q:v ${q} "${output}\\%04d.jpg"`;
+    cmd = `ffmpeg -i "${video}" -q:v ${ffmpegQ} "${output}\\%04d.jpg"`;
   } else {
-    cmd = `ffmpeg -i "${video}" -vf "select=not(mod(n\\,${step}))" -vsync vfr -q:v ${q} "${output}\\%04d.jpg"`;
+    cmd = `ffmpeg -i "${video}" -vf "select=not(mod(n\\,${step}))" -vsync vfr -q:v ${ffmpegQ} "${output}\\%04d.jpg"`;
   }
-  cmd += `\n\n# 出力: equirectangular 7680x3840 JPG連番`;
+  cmd += `\n\n# 品質: ${uiQuality}/10 (FFmpeg -q:v ${ffmpegQ})`;
+  cmd += `\n# 出力: equirectangular 7680x3840 JPG連番`;
   document.getElementById('cmd-s1').textContent = cmd;
 }
 
