@@ -541,19 +541,55 @@
 
   <!-- ==================== STEP 3: FFmpeg 8方向分割 ==================== -->
   <div class="panel" id="panel-step3">
-    <h2><span class="step-badge purple">STEP 3</span> FFmpeg v360 8方向分割</h2>
-    <p class="desc">equirectangular画像をFFmpegのv360フィルタで8方向の透視投影（perspective）画像に分割します。</p>
+    <h2><span class="step-badge purple">STEP 3</span> FFmpeg v360 透視投影分割</h2>
+    <p class="desc">equirectangular画像をFFmpegのv360フィルタで透視投影（perspective）画像に分割します。</p>
     <div class="time-est">&#x23F1; 所要時間: 数分〜数十分（画像数による）</div>
 
     <div class="card">
+      <h3>分割パターンの選択</h3>
+      <div class="choices">
+        <div class="choice selected" onclick="selectSplitPattern('A')" id="split-pattern-A">
+          <div class="choice-title">パターンA: 水平8方向</div>
+          <div class="choice-desc">水平方向のみ45度間隔で8枚。シンプルで処理が軽い。</div>
+          <div class="choice-tag tag-rec">基本</div>
+        </div>
+        <div class="choice" onclick="selectSplitPattern('B')" id="split-pattern-B">
+          <div class="choice-title">パターンB: 水平8方向 + 上下斜め4方向</div>
+          <div class="choice-desc">水平8枚 + 前後30度見下げ + 左右30度見上げ。オーバーラップが増え、RSアライメント品質が向上。</div>
+          <div class="choice-tag" style="background:rgba(139,92,246,0.15);color:var(--accent2);">高品質</div>
+        </div>
+      </div>
+      <div class="note note-green" style="margin-top:10px;">
+        <b>参考:</b> lileaLabのスライド(P.28)によると、斜め方向を加えた構成はオーバーラップが増え、カメラ最適化品質が向上します。
+        水平4方向のみ(△)に対し、8方向+斜め(◎)が推奨されています。
+      </div>
+    </div>
+
+    <div class="card">
       <h3>出力仕様</h3>
-      <table class="data-table">
+      <table class="data-table" id="split-spec-table">
         <tr><th>項目</th><th>値</th></tr>
-        <tr><td>方向数</td><td>8方向（45度間隔: 0, 45, 90, 135, 180, 225, 270, 315度）</td></tr>
         <tr><td>FOV</td><td>90度</td></tr>
         <tr><td>解像度</td><td>1920 x 1920 px</td></tr>
         <tr><td>命名規則</td><td><code>{フレーム番号}_{方向角度}.jpg</code> 例: <code>0001_000.jpg</code></td></tr>
       </table>
+      <div id="split-directions-detail" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>画像枚数の計算</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>フレーム数（手動入力）</label>
+          <input type="number" id="s3-frame-count" value="1010" min="1" oninput="calcSplitTotal()">
+        </div>
+        <div class="form-group">
+          <label>選択パターン</label>
+          <input type="text" id="s3-pattern-display" value="パターンA: 8枚/フレーム" readonly style="background:var(--bg); color:var(--text2);">
+        </div>
+      </div>
+      <div id="split-calc-result" style="margin-top:12px; padding:14px; background:var(--surface2); border-radius:var(--radius); font-size:0.9rem;">
+      </div>
     </div>
 
     <div class="card">
@@ -578,8 +614,26 @@
     </div>
 
     <div class="note">
-      <b>重要:</b> 8方向すべて同じ中心点（カメラ位置）から撮影したものとして扱います。オフセットは入れません。
+      <b>重要:</b> 全方向すべて同じ中心点（カメラ位置）から撮影したものとして扱います。オフセットは入れません。
     </div>
+
+    <details>
+      <summary>パターンBの方向一覧（12方向）</summary>
+      <div class="detail-body">
+        <table class="data-table">
+          <tr><th>#</th><th>Yaw (水平)</th><th>Pitch (垂直)</th><th>説明</th></tr>
+          <tr><td>1-8</td><td>0, 45, 90, 135, 180, 225, 270, 315</td><td>0°</td><td>水平8方向</td></tr>
+          <tr><td>9</td><td>0° (前方)</td><td>-30°</td><td>前方30度見下げ</td></tr>
+          <tr><td>10</td><td>180° (後方)</td><td>-30°</td><td>後方30度見下げ</td></tr>
+          <tr><td>11</td><td>90° (右)</td><td>+30°</td><td>右30度見上げ</td></tr>
+          <tr><td>12</td><td>270° (左)</td><td>+30°</td><td>左30度見上げ</td></tr>
+        </table>
+        <div class="note" style="margin-top:8px;">
+          pitch=-30° は下方向を見ます（地面寄り）。pitch=+30° は上方向（空・建物上部寄り）。<br>
+          これにより垂直方向のオーバーラップが増え、3Dポイントのマッチング精度が上がります。
+        </div>
+      </div>
+    </details>
 
     <details>
       <summary>FFmpeg v360フィルタの詳細</summary>
@@ -589,12 +643,11 @@
           <div class="code-block" id="cmd-s3-detail">ffmpeg -i input.jpg -vf "v360=equirect:flat:h_fov=90:v_fov=90:yaw=0:pitch=0:roll=0,scale=1920:1920" -frames:v 1 -q:v 2 output.jpg
 
 # yaw: 水平方向の角度 (0, 45, 90, ... 315)
-# pitch: 垂直方向の角度 (常に0 = 水平)
+# pitch: 垂直方向の角度 (0=水平, -30=下, +30=上)
 # roll: 回転 (常に0)
 # h_fov/v_fov: 水平/垂直視野角</div>
           <button class="copy-btn" onclick="copyCode('cmd-s3-detail')">Copy</button>
         </div>
-        <p style="margin-top:8px;">バッチ処理は全フレーム x 8方向のループで実行します。</p>
       </div>
     </details>
   </div>
@@ -1046,18 +1099,102 @@ function genStep1Cmd() {
   document.getElementById('cmd-s1').textContent = cmd;
 }
 
+// ============================================================
+// Step 3: Split pattern logic
+// ============================================================
+const SPLIT_PATTERNS = {
+  A: {
+    name: 'パターンA: 水平8方向',
+    count: 8,
+    directions: [
+      { yaw: 0, pitch: 0 }, { yaw: 45, pitch: 0 }, { yaw: 90, pitch: 0 }, { yaw: 135, pitch: 0 },
+      { yaw: 180, pitch: 0 }, { yaw: 225, pitch: 0 }, { yaw: 270, pitch: 0 }, { yaw: 315, pitch: 0 },
+    ]
+  },
+  B: {
+    name: 'パターンB: 水平8方向 + 上下斜め4方向',
+    count: 12,
+    directions: [
+      { yaw: 0, pitch: 0 }, { yaw: 45, pitch: 0 }, { yaw: 90, pitch: 0 }, { yaw: 135, pitch: 0 },
+      { yaw: 180, pitch: 0 }, { yaw: 225, pitch: 0 }, { yaw: 270, pitch: 0 }, { yaw: 315, pitch: 0 },
+      { yaw: 0, pitch: -30, label: '前方見下げ' }, { yaw: 180, pitch: -30, label: '後方見下げ' },
+      { yaw: 90, pitch: 30, label: '右見上げ' }, { yaw: 270, pitch: 30, label: '左見上げ' },
+    ]
+  }
+};
+let currentSplitPattern = 'A';
+
+function selectSplitPattern(key) {
+  currentSplitPattern = key;
+  document.querySelectorAll('#panel-step3 .choice').forEach(c => c.classList.remove('selected'));
+  document.getElementById('split-pattern-' + key).classList.add('selected');
+
+  const p = SPLIT_PATTERNS[key];
+  document.getElementById('s3-pattern-display').value = p.name.replace('パターンA: ', '').replace('パターンB: ', '') + ' (' + p.count + '枚/フレーム)';
+
+  // Update directions detail
+  const detail = document.getElementById('split-directions-detail');
+  let html = '<div style="font-size:0.8rem; color:var(--text2);">';
+  html += '<b>方向一覧:</b> ';
+  p.directions.forEach((d, i) => {
+    const pitchStr = d.pitch !== 0 ? ` P${d.pitch > 0 ? '+' : ''}${d.pitch}°` : '';
+    html += `<span style="display:inline-block; background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:1px 6px; margin:2px; font-family:monospace; font-size:0.75rem;">Y${d.yaw}°${pitchStr}</span>`;
+  });
+  html += '</div>';
+  detail.innerHTML = html;
+
+  calcSplitTotal();
+  saveState();
+}
+
+function calcSplitTotal() {
+  const frames = parseInt(document.getElementById('s3-frame-count').value) || 0;
+  const p = SPLIT_PATTERNS[currentSplitPattern];
+  const total = frames * p.count;
+  const sizeEstMB = Math.round(total * 0.35); // ~350KB per 1920x1920 JPG
+
+  const result = document.getElementById('split-calc-result');
+  result.innerHTML = `
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center;">
+      <div>
+        <div style="font-size:1.4rem; font-weight:700; color:var(--accent);">${frames.toLocaleString()}</div>
+        <div style="font-size:0.72rem; color:var(--text2);">フレーム数</div>
+      </div>
+      <div>
+        <div style="font-size:1.4rem; font-weight:700; color:var(--accent);">x ${p.count}</div>
+        <div style="font-size:0.72rem; color:var(--text2);">方向/フレーム</div>
+      </div>
+      <div>
+        <div style="font-size:1.4rem; font-weight:700; color:var(--green);">${total.toLocaleString()}</div>
+        <div style="font-size:0.72rem; color:var(--text2);">総画像枚数</div>
+      </div>
+    </div>
+    <div style="margin-top:10px; font-size:0.78rem; color:var(--text2); text-align:center;">
+      推定ディスク容量: 約 ${sizeEstMB > 1000 ? (sizeEstMB/1000).toFixed(1) + ' GB' : sizeEstMB + ' MB'}
+      （1枚あたり約350KB想定）
+    </div>
+  `;
+}
+
 function genStep3Cmd() {
   const inDir = v('s3-input') || '<images_S>';
   const outDir = v('s3-output') || '<images_P>';
-  const angles = [0, 45, 90, 135, 180, 225, 270, 315];
-  let cmd = '# 全天球1枚に対する8方向分割コマンド例 (0001.jpg):\n\n';
-  angles.forEach(yaw => {
-    const a = String(yaw).padStart(3, '0');
-    cmd += `ffmpeg -i "${inDir}\\0001.jpg" -vf "v360=equirect:flat:h_fov=90:v_fov=90:yaw=${yaw}:pitch=0:roll=0,scale=1920:1920" -frames:v 1 -q:v 2 "${outDir}\\0001_${a}.jpg"\n`;
+  const p = SPLIT_PATTERNS[currentSplitPattern];
+  let cmd = `# ${p.name} — 全天球1枚に対する分割コマンド例 (0001.jpg):\n\n`;
+  p.directions.forEach(d => {
+    const yawStr = String(d.yaw).padStart(3, '0');
+    const pitchStr = d.pitch !== 0 ? `p${d.pitch > 0 ? '+' : ''}${d.pitch}` : '';
+    const suffix = pitchStr ? `${yawStr}_${pitchStr}` : yawStr;
+    cmd += `ffmpeg -i "${inDir}\\0001.jpg" -vf "v360=equirect:flat:h_fov=90:v_fov=90:yaw=${d.yaw}:pitch=${d.pitch}:roll=0,scale=1920:1920" -frames:v 1 -q:v 2 "${outDir}\\0001_${suffix}.jpg"\n`;
   });
-  cmd += '\n# 全フレームをバッチ処理するにはforループで回す';
+  cmd += `\n# ${p.count}方向 x 全フレーム = バッチ処理で回す`;
   document.getElementById('cmd-s3').textContent = cmd;
 }
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+  selectSplitPattern(currentSplitPattern);
+});
 
 // ============================================================
 // Persistence
