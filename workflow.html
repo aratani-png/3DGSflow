@@ -444,6 +444,24 @@
     <div class="note note-green">
       <b>確認済み:</b> このワークフロー全体が2026-03-20にテスト・動作確認済みです。各ステップの詳細は左のメニューから確認できます。
     </div>
+
+    <hr>
+
+    <div class="card">
+      <h3>ワークフロー指示書をコピー</h3>
+      <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
+        現在のワークフローをテキストとしてコピーできます。チャットやドキュメントに貼り付けて作業指示として使えます。
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="btn btn-sm" onclick="copyWorkflow('full')">全体フロー</button>
+        <button class="btn btn-sm btn-secondary" onclick="copyWorkflow('technical')">技術詳細付き</button>
+        <button class="btn btn-sm btn-secondary" onclick="copyWorkflow('short')">簡易版</button>
+      </div>
+      <div class="code-wrap">
+        <div class="code-block" id="cmd-workflow" style="max-height:400px; overflow-y:auto; white-space:pre-wrap;"><span style="color:var(--text3)">上のボタンでワークフローテキストを生成</span></div>
+        <button class="copy-btn" onclick="copyCode('cmd-workflow')">Copy</button>
+      </div>
+    </div>
   </div>
 
   <!-- ==================== STEP 1: フレーム抽出 ==================== -->
@@ -1272,6 +1290,122 @@ function genStep3Cmd() {
   });
   cmd += `\n# ${p.count}方向 x 全フレーム = バッチ処理で回す`;
   document.getElementById('cmd-s3').textContent = cmd;
+}
+
+// ============================================================
+// Workflow copy-paste
+// ============================================================
+function copyWorkflow(type) {
+  let text = '';
+
+  if (type === 'short') {
+    text = `【3DGSワークフロー（簡易版）】
+
+1. 360°動画 → FFmpegでフレーム抽出（equirectangular 7680x3840）
+2. Metashape → 全天球Sphericalアライメント → camera.xml出力
+3. FFmpeg v360 → 8方向perspective分割（1920x1920, FOV90°）
+4. camera.xmlからXMP生成（c2w→転置w2c, exact prior）
+5. エリア分割（2フレームオーバーラップ）→ RSでAlign + メッシュ構築 → CSV + PLYエクスポート
+6. Postshotで CSV + PLY を読み込み → 3DGSトレーニング
+
+※ Metashapeはカメラ位置推定のみに使用（3DGSデータはperspective分割画像）`;
+
+  } else if (type === 'full') {
+    text = `【3DGSワークフロー（全体フロー）】
+
+■ 概要
+360°動画から3D Gaussian Splatting（3DGS）を生成するパイプライン。
+Metashapeで位置推定 → FFmpegで分割 → RSでアライメント+メッシュ → Postshotで3DGS化。
+
+■ STEP 1: フレーム抽出（FFmpeg）
+- 入力: 360°動画（.mp4/.mov）
+- 出力: equirectangularフレーム連番（7680x3840）→ images_S/
+- 所要時間: 数分
+
+■ STEP 2: Metashape Sphericalアライメント（手動）
+- 全天球画像をMetashapeに読み込み → カメラタイプ「Spherical」
+- Align Photos → camera.xmlエクスポート
+- ※位置推定のみに使用
+- 所要時間: 5-15分
+
+■ STEP 3: FFmpeg v360 透視投影分割
+- equirectangular → 8方向perspective（1920x1920, FOV90°, 45°間隔）
+- オプション: +上下斜め4方向（合計12方向、P28参考）
+- 出力: {フレーム番号}_{角度}.jpg → images_P/
+- 所要時間: 数分〜数十分
+
+■ STEP 4: XMP生成（Python）
+- camera.xmlの回転行列を転置（c2w → w2c）
+- PosePrior="exact", CalibrationPrior="exact"
+- 全方向同一中心点（オフセットなし）
+- 所要時間: 数秒
+
+■ STEP 5: RealityScan アライメント + メッシュ構築
+- 画像+XMPをRSに読み込み → Align（~1分/エリア）
+- メッシュ構築 High Detail（~8分/エリア）
+- CSV（Registration）+ PLY（メッシュ点群）エクスポート
+- エリア分割: 24分割推奨（2フレームオーバーラップ）
+
+■ STEP 6-7: 3DGSトレーニング
+【Postshot（推奨）】
+- CSV + PLYをそのまま読み込み。変換不要。
+- 大規模（6,000枚以上）でも安定動作確認済み。
+
+【LichtFeld Studio（無料・小規模向き）】
+- COLMAP形式に変換が必要（CSV+PLY+XMP → cameras.txt/images.txt/points3D.ply）
+- 小〜中規模（数百枚）で動作確認済み。大規模は点群読み込みに課題あり。
+
+■ 重要な注意事項
+- XMPのRotationは転置済み（w2c）→ COLMAP変換時に再転置しないこと
+- Metashapeは位置推定のみ。全天球のまま3DGSに入れる予定はない
+- メッシュPLYが必要（疎な点群だとスプラット巨大化）
+- PLYサイズ上限（LichtFeld）: ~4000-5000万頂点、600-700MB
+- exactだとRSアライメント安定。initialだと分裂する場合あり`;
+
+  } else if (type === 'technical') {
+    text = `【3DGSワークフロー（技術詳細付き）】
+
+■ パイプライン
+360°動画 → フレーム抽出 → Metashape(Spherical) → FFmpeg(v360) → XMP生成 → RS(Align+Mesh) → Postshot/LichtFeld
+
+■ 座標系変換
+- Metashape XML: c2w, Z-up, row-major 4x4
+- XMP xcr:Rotation: 元はc2w（R^-1）を格納 → 転置してw2c化
+- COLMAP images.txt: w2c, OpenCV(X右Y下Z前), quaternion wxyz
+- transforms.json: c2w, OpenGL(X右Y上Z後), 4x4行列
+- 位置変換: Metashape(x,y,z) → RS XMP(x,-z,y)
+- COLMAP Translation: T = -R_w2c @ C
+
+■ XMP設定
+- xcr:Rotation: 転置済みw2c, row-major 9値
+- xcr:Position: カメラ中心ワールド座標（全方向同一）
+- xcr:PosePrior: "exact"（推奨）/ "initial"（RS微調整可、分裂リスク）/ "locked"（完全固定）
+- xcr:CalibrationPrior: PosePriorと同じ値
+- xcr:FocalLength35mm: 18.0（FOV90°, 1920x1920の場合）
+- xcr:DistortionModel: "brown3"
+- xcr:DistortionCoeficients: "0 0 0 0 0 0"
+
+■ COLMAP形式（LichtFeld Studio用）
+cameras.txt: 1 PINHOLE 1920 1920 960.0 960.0 960.0 960.0
+images.txt: IMAGE_ID QW QX QY QZ TX TY TZ CAMERA_ID NAME（2行ずつ、POINTS2D空行）
+points3D.ply: メッシュPLY（face除去+uchar色変換+間引きが必要な場合あり）
+
+■ PLYサイズ目安
+- 24分割(~700枚): ~800MB → そのまま使用可
+- 半分(~4000枚): ~6GB → 1/3間引き(625MB)で成功
+- 上限: ~4000-5000万頂点, 600-700MB
+
+■ LichtFeld Studio大規模設定（未検証）
+--resize_factor 4, Max Gaussians 60万, SH Degree 2, Tile Mode 4
+CPU Cache ON, FS Cache ON, headlessモード
+
+■ 参考
+- lileaLab スライド: https://www.docswell.com/s/lileaLab/Z44DV6-260214
+- lileaLab 設定ガイド: https://lilea.net/lab/how-to-use-lichtfeld-studio/
+- GitHub: https://github.com/aratani-png/3DGSflow`;
+  }
+
+  document.getElementById('cmd-workflow').textContent = text;
 }
 
 // ============================================================
