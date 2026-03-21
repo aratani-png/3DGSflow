@@ -585,9 +585,9 @@
           <div class="choice-tag" style="background:rgba(139,92,246,0.15);color:var(--accent2);">高品質</div>
         </div>
         <div class="choice" onclick="selectSplitPattern('C')" id="split-pattern-C">
-          <div class="choice-title">パターンC: 8方向+上下各8方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向+上方向8方向(pitch+30度)+下方向8方向(pitch-30度)の計24方向に分割してください。全方向45度間隔、FOV90度、1920x1920px。', this)">Copy</button></div>
-          <div class="choice-desc">水平8枚 + 上30度8枚 + 下30度8枚 = 計24枚/フレーム。最大のオーバーラップで最高品質。</div>
-          <div class="choice-tag" style="background:rgba(245,158,11,0.15);color:var(--orange);">最高品質・大容量</div>
+          <div class="choice-title">パターンC: 8方向+上下各4方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向+上方向4方向(pitch+30度,90度間隔)+下方向4方向(pitch-30度,90度間隔)の計16方向に分割してください。FOV90度、1920x1920px。', this)">Copy</button></div>
+          <div class="choice-desc">水平8枚 + 上30度4枚 + 下30度4枚 = 計16枚/フレーム。バランスの良い高品質構成。</div>
+          <div class="choice-tag" style="background:rgba(245,158,11,0.15);color:var(--orange);">高品質</div>
         </div>
       </div>
       <div class="note note-green" style="margin-top:10px;">
@@ -1228,15 +1228,13 @@ const SPLIT_PATTERNS = {
     ]
   },
   C: {
-    name: 'パターンC: 水平8方向 + 上下各8方向',
-    count: 24,
+    name: 'パターンC: 水平8方向 + 上下各4方向',
+    count: 16,
     directions: [
       { yaw: 0, pitch: 0 }, { yaw: 45, pitch: 0 }, { yaw: 90, pitch: 0 }, { yaw: 135, pitch: 0 },
       { yaw: 180, pitch: 0 }, { yaw: 225, pitch: 0 }, { yaw: 270, pitch: 0 }, { yaw: 315, pitch: 0 },
-      { yaw: 0, pitch: 30 }, { yaw: 45, pitch: 30 }, { yaw: 90, pitch: 30 }, { yaw: 135, pitch: 30 },
-      { yaw: 180, pitch: 30 }, { yaw: 225, pitch: 30 }, { yaw: 270, pitch: 30 }, { yaw: 315, pitch: 30 },
-      { yaw: 0, pitch: -30 }, { yaw: 45, pitch: -30 }, { yaw: 90, pitch: -30 }, { yaw: 135, pitch: -30 },
-      { yaw: 180, pitch: -30 }, { yaw: 225, pitch: -30 }, { yaw: 270, pitch: -30 }, { yaw: 315, pitch: -30 },
+      { yaw: 0, pitch: 30 }, { yaw: 90, pitch: 30 }, { yaw: 180, pitch: 30 }, { yaw: 270, pitch: 30 },
+      { yaw: 0, pitch: -30 }, { yaw: 90, pitch: -30 }, { yaw: 180, pitch: -30 }, { yaw: 270, pitch: -30 },
     ]
   }
 };
