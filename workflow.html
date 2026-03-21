@@ -580,9 +580,14 @@
           <div class="choice-tag tag-rec">基本</div>
         </div>
         <div class="choice" onclick="selectSplitPattern('B')" id="split-pattern-B">
-          <div class="choice-title">パターンB: 8方向+上下4方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向+上下斜め4方向の計12方向に分割してください。水平は45度間隔、前後pitch-30度、左右pitch+30度。FOV90度、1920x1920px。', this)">Copy</button></div>
+          <div class="choice-title">パターンB: 8方向+上下斜め4方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向+上下斜め4方向の計12方向に分割してください。水平は45度間隔、前後pitch-30度、左右pitch+30度。FOV90度、1920x1920px。', this)">Copy</button></div>
           <div class="choice-desc">水平8枚 + 前後30度見下げ + 左右30度見上げ。オーバーラップが増え、RSアライメント品質が向上。</div>
           <div class="choice-tag" style="background:rgba(139,92,246,0.15);color:var(--accent2);">高品質</div>
+        </div>
+        <div class="choice" onclick="selectSplitPattern('C')" id="split-pattern-C">
+          <div class="choice-title">パターンC: 8方向+上下各8方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向+上方向8方向(pitch+30度)+下方向8方向(pitch-30度)の計24方向に分割してください。全方向45度間隔、FOV90度、1920x1920px。', this)">Copy</button></div>
+          <div class="choice-desc">水平8枚 + 上30度8枚 + 下30度8枚 = 計24枚/フレーム。最大のオーバーラップで最高品質。</div>
+          <div class="choice-tag" style="background:rgba(245,158,11,0.15);color:var(--orange);">最高品質・大容量</div>
         </div>
       </div>
       <div class="note note-green" style="margin-top:10px;">
@@ -1220,6 +1225,18 @@ const SPLIT_PATTERNS = {
       { yaw: 180, pitch: 0 }, { yaw: 225, pitch: 0 }, { yaw: 270, pitch: 0 }, { yaw: 315, pitch: 0 },
       { yaw: 0, pitch: -30, label: '前方見下げ' }, { yaw: 180, pitch: -30, label: '後方見下げ' },
       { yaw: 90, pitch: 30, label: '右見上げ' }, { yaw: 270, pitch: 30, label: '左見上げ' },
+    ]
+  },
+  C: {
+    name: 'パターンC: 水平8方向 + 上下各8方向',
+    count: 24,
+    directions: [
+      { yaw: 0, pitch: 0 }, { yaw: 45, pitch: 0 }, { yaw: 90, pitch: 0 }, { yaw: 135, pitch: 0 },
+      { yaw: 180, pitch: 0 }, { yaw: 225, pitch: 0 }, { yaw: 270, pitch: 0 }, { yaw: 315, pitch: 0 },
+      { yaw: 0, pitch: 30 }, { yaw: 45, pitch: 30 }, { yaw: 90, pitch: 30 }, { yaw: 135, pitch: 30 },
+      { yaw: 180, pitch: 30 }, { yaw: 225, pitch: 30 }, { yaw: 270, pitch: 30 }, { yaw: 315, pitch: 30 },
+      { yaw: 0, pitch: -30 }, { yaw: 45, pitch: -30 }, { yaw: 90, pitch: -30 }, { yaw: 135, pitch: -30 },
+      { yaw: 180, pitch: -30 }, { yaw: 225, pitch: -30 }, { yaw: 270, pitch: -30 }, { yaw: 315, pitch: -30 },
     ]
   }
 };
