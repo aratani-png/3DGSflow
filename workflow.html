@@ -575,12 +575,12 @@
       <h3>分割パターンの選択</h3>
       <div class="choices">
         <div class="choice selected" onclick="selectSplitPattern('A')" id="split-pattern-A">
-          <div class="choice-title">パターンA: 水平8方向</div>
+          <div class="choice-title">パターンA: 水平8方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向に分割してください。45度間隔（0,45,90,135,180,225,270,315度）、FOV90度、1920x1920px。', this)">Copy</button></div>
           <div class="choice-desc">水平方向のみ45度間隔で8枚。シンプルで処理が軽い。</div>
           <div class="choice-tag tag-rec">基本</div>
         </div>
         <div class="choice" onclick="selectSplitPattern('B')" id="split-pattern-B">
-          <div class="choice-title">パターンB: 水平8方向 + 上下斜め4方向</div>
+          <div class="choice-title">パターンB: 8方向+上下4方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向+上下斜め4方向の計12方向に分割してください。水平は45度間隔、前後pitch-30度、左右pitch+30度。FOV90度、1920x1920px。', this)">Copy</button></div>
           <div class="choice-desc">水平8枚 + 前後30度見下げ + 左右30度見上げ。オーバーラップが増え、RSアライメント品質が向上。</div>
           <div class="choice-tag" style="background:rgba(139,92,246,0.15);color:var(--accent2);">高品質</div>
         </div>
@@ -699,26 +699,22 @@
     </div>
 
     <div class="card">
-      <h3>PosePriorの選択肢 <span style="font-size:0.72rem; color:var(--text3); font-weight:normal;">— クリックで詳細表示＋コピー可能</span></h3>
+      <h3>PosePriorの選択肢</h3>
       <div class="choices">
-        <div class="choice selected" onclick="selectPosePrior('exact')">
-          <div class="choice-title">exact</div>
+        <div class="choice selected" onclick="selectChoice(this)">
+          <div class="choice-title">exact <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('XMP設定をexactで生成してください。PosePrior=exact, CalibrationPrior=exact。相対位置を維持し、RSが大きく動かさない安定モードです。', this)">Copy</button></div>
           <div class="choice-desc">相対位置を維持。RSが大きく動かさない。安定。</div>
           <div class="choice-tag tag-rec">推奨</div>
         </div>
-        <div class="choice" onclick="selectPosePrior('initial')">
-          <div class="choice-title">initial</div>
+        <div class="choice" onclick="selectChoice(this)">
+          <div class="choice-title">initial <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('XMP設定をinitialで生成してください。PosePrior=initial, CalibrationPrior=initial。RSが特徴点ベースで位置・向きを自由に微調整します。ただしスプリット（分離）する場合あり。', this)">Copy</button></div>
           <div class="choice-desc">RSが自由に調整可能。スプリットが起きる場合あり。</div>
           <div class="choice-tag tag-warn">不安定な場合あり</div>
         </div>
-        <div class="choice" onclick="selectPosePrior('locked')">
-          <div class="choice-title">locked</div>
+        <div class="choice" onclick="selectChoice(this)">
+          <div class="choice-title">locked <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('XMP設定をlockedで生成してください。PosePrior=locked, CalibrationPrior=locked。カメラ位置を完全に固定し、RSは一切変更しません。', this)">Copy</button></div>
           <div class="choice-desc">完全に固定。RSは位置を一切変更しない。</div>
         </div>
-      </div>
-      <div class="code-wrap" id="poseprior-detail" style="margin-top:12px;">
-        <div class="code-block" id="cmd-poseprior"></div>
-        <button class="copy-btn" onclick="copyCode('cmd-poseprior')">Copy</button>
       </div>
     </div>
 
@@ -837,12 +833,12 @@
       <h3>トレーニングツールの選択</h3>
       <div class="choices">
         <div class="choice" onclick="selectTrainTool('postshot')" id="train-tool-postshot">
-          <div class="choice-title">Postshot</div>
+          <div class="choice-title">Postshot <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('PostshotでCSV+PLYを読み込んで3DGSトレーニングしてください。COLMAP変換は不要です。', this)">Copy</button></div>
           <div class="choice-desc">CSV + PLY をそのまま読み込み。変換不要で最も簡単。大規模データセット（数千枚）でも安定。</div>
           <div class="choice-tag tag-rec">推奨（大規模）</div>
         </div>
         <div class="choice selected" onclick="selectTrainTool('lichtfeld')" id="train-tool-lichtfeld">
-          <div class="choice-title">LichtFeld Studio</div>
+          <div class="choice-title">LichtFeld Studio <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('LichtFeld StudioでCOLMAP形式のデータを読み込んで3DGSトレーニングしてください。CSV+PLY+XMPからCOLMAP変換が必要です。', this)">Copy</button></div>
           <div class="choice-desc">COLMAP形式に変換が必要。無料・オープンソース。小〜中規模（数百枚）で検証済み。</div>
           <div class="choice-tag" style="background:rgba(139,92,246,0.15);color:var(--accent2);">無料</div>
         </div>
@@ -1297,83 +1293,15 @@ function genStep3Cmd() {
 }
 
 // ============================================================
-// PosePrior selection + copy
+// Copy text helper (for inline copy buttons)
 // ============================================================
-const POSE_PRIOR_INFO = {
-  exact: `【XMP設定: exact モード】
-
-xcr:PosePrior="exact"
-xcr:CalibrationPrior="exact"
-
-■ 動作
-- カメラ間の相対位置は正しいものとして維持
-- RSがグローバル位置は調整するが、相対関係は変えない
-- アライメントが最も安定
-
-■ テスト結果
-- 24分割（~700枚/エリア）で100%成功
-- 全方向のカメラが正しく展開される
-- 推奨設定
-
-■ XMP例
-xcr:Rotation="0.999033 0.012197 0.004539 -0.004554 0.001152 0.999989 0.012191 -0.999925 0.001208"
-xcr:Position="-39.781464 62.381617 9.868247"
-xcr:FocalLength35mm="18.0"
-xcr:DistortionModel="brown3"
-xcr:DistortionCoeficients="0 0 0 0 0 0"`,
-
-  initial: `【XMP設定: initial モード】
-
-xcr:PosePrior="initial"
-xcr:CalibrationPrior="initial"
-
-■ 動作
-- XMPの値を「参考値」としてRSに渡す
-- RSが特徴点ベースでカメラ位置・向きを自由に再計算・微調整する
-- より精度の高いアライメントが得られる可能性がある
-
-■ テスト結果
-- 画像グループがスプリット（分離）する場合あり
-- 24分割でも"Multiple components created"警告が発生
-- 特徴点のオーバーラップが弱い区間で分裂しやすい
-- Feature detection quality を High に上げると改善する可能性あり
-
-■ 使用場面
-- exactで位置精度に不満がある場合
-- RSに最適化を任せたい場合（ただし分裂リスクあり）
-
-■ 参考: lileaLabスライドP.30
-"draft版XMPで座標維持しつつ位置・向き最適化"`,
-
-  locked: `【XMP設定: locked モード】
-
-xcr:PosePrior="locked"
-xcr:CalibrationPrior="locked"
-
-■ 動作
-- カメラ位置は既知として完全に固定
-- RSは位置を一切変更しない
-- XMPの値がそのまま最終的なカメラ位置になる
-
-■ 使用場面
-- 正確な位置が判明している場合（測量データ等）
-- カメラ位置を絶対に動かしたくない場合
-
-■ 注意
-- 位置が少しでもずれていると品質が悪化する
-- 通常のワークフローでは使用しない`
-};
-
-function selectPosePrior(mode) {
-  // Update choice selection
-  const choices = document.querySelectorAll('#panel-step4 .choices .choice');
-  choices.forEach(c => c.classList.remove('selected'));
-  const modeIdx = { exact: 0, initial: 1, locked: 2 };
-  if (choices[modeIdx[mode]]) choices[modeIdx[mode]].classList.add('selected');
-
-  // Show detail
-  document.getElementById('cmd-poseprior').textContent = POSE_PRIOR_INFO[mode];
-  saveState();
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
+  });
 }
 
 // ============================================================
@@ -1525,7 +1453,6 @@ function selectTrainTool(tool) {
 document.addEventListener('DOMContentLoaded', () => {
   selectSplitPattern(currentSplitPattern);
   selectTrainTool(currentTrainTool);
-  selectPosePrior('exact');
 
   // Drag & drop for file path inputs
   function setupFileDrop(inputId) {
