@@ -699,22 +699,26 @@
     </div>
 
     <div class="card">
-      <h3>PosePriorの選択肢</h3>
+      <h3>PosePriorの選択肢 <span style="font-size:0.72rem; color:var(--text3); font-weight:normal;">— クリックで詳細表示＋コピー可能</span></h3>
       <div class="choices">
-        <div class="choice selected" onclick="selectChoice(this)">
+        <div class="choice selected" onclick="selectPosePrior('exact')">
           <div class="choice-title">exact</div>
           <div class="choice-desc">相対位置を維持。RSが大きく動かさない。安定。</div>
           <div class="choice-tag tag-rec">推奨</div>
         </div>
-        <div class="choice" onclick="selectChoice(this)">
+        <div class="choice" onclick="selectPosePrior('initial')">
           <div class="choice-title">initial</div>
           <div class="choice-desc">RSが自由に調整可能。スプリットが起きる場合あり。</div>
           <div class="choice-tag tag-warn">不安定な場合あり</div>
         </div>
-        <div class="choice" onclick="selectChoice(this)">
+        <div class="choice" onclick="selectPosePrior('locked')">
           <div class="choice-title">locked</div>
           <div class="choice-desc">完全に固定。RSは位置を一切変更しない。</div>
         </div>
+      </div>
+      <div class="code-wrap" id="poseprior-detail" style="margin-top:12px;">
+        <div class="code-block" id="cmd-poseprior"></div>
+        <button class="copy-btn" onclick="copyCode('cmd-poseprior')">Copy</button>
       </div>
     </div>
 
@@ -1293,6 +1297,86 @@ function genStep3Cmd() {
 }
 
 // ============================================================
+// PosePrior selection + copy
+// ============================================================
+const POSE_PRIOR_INFO = {
+  exact: `【XMP設定: exact モード】
+
+xcr:PosePrior="exact"
+xcr:CalibrationPrior="exact"
+
+■ 動作
+- カメラ間の相対位置は正しいものとして維持
+- RSがグローバル位置は調整するが、相対関係は変えない
+- アライメントが最も安定
+
+■ テスト結果
+- 24分割（~700枚/エリア）で100%成功
+- 全方向のカメラが正しく展開される
+- 推奨設定
+
+■ XMP例
+xcr:Rotation="0.999033 0.012197 0.004539 -0.004554 0.001152 0.999989 0.012191 -0.999925 0.001208"
+xcr:Position="-39.781464 62.381617 9.868247"
+xcr:FocalLength35mm="18.0"
+xcr:DistortionModel="brown3"
+xcr:DistortionCoeficients="0 0 0 0 0 0"`,
+
+  initial: `【XMP設定: initial モード】
+
+xcr:PosePrior="initial"
+xcr:CalibrationPrior="initial"
+
+■ 動作
+- XMPの値を「参考値」としてRSに渡す
+- RSが特徴点ベースでカメラ位置・向きを自由に再計算・微調整する
+- より精度の高いアライメントが得られる可能性がある
+
+■ テスト結果
+- 画像グループがスプリット（分離）する場合あり
+- 24分割でも"Multiple components created"警告が発生
+- 特徴点のオーバーラップが弱い区間で分裂しやすい
+- Feature detection quality を High に上げると改善する可能性あり
+
+■ 使用場面
+- exactで位置精度に不満がある場合
+- RSに最適化を任せたい場合（ただし分裂リスクあり）
+
+■ 参考: lileaLabスライドP.30
+"draft版XMPで座標維持しつつ位置・向き最適化"`,
+
+  locked: `【XMP設定: locked モード】
+
+xcr:PosePrior="locked"
+xcr:CalibrationPrior="locked"
+
+■ 動作
+- カメラ位置は既知として完全に固定
+- RSは位置を一切変更しない
+- XMPの値がそのまま最終的なカメラ位置になる
+
+■ 使用場面
+- 正確な位置が判明している場合（測量データ等）
+- カメラ位置を絶対に動かしたくない場合
+
+■ 注意
+- 位置が少しでもずれていると品質が悪化する
+- 通常のワークフローでは使用しない`
+};
+
+function selectPosePrior(mode) {
+  // Update choice selection
+  const choices = document.querySelectorAll('#panel-step4 .choices .choice');
+  choices.forEach(c => c.classList.remove('selected'));
+  const modeIdx = { exact: 0, initial: 1, locked: 2 };
+  if (choices[modeIdx[mode]]) choices[modeIdx[mode]].classList.add('selected');
+
+  // Show detail
+  document.getElementById('cmd-poseprior').textContent = POSE_PRIOR_INFO[mode];
+  saveState();
+}
+
+// ============================================================
 // Workflow copy-paste
 // ============================================================
 function copyWorkflow(type) {
@@ -1441,6 +1525,7 @@ function selectTrainTool(tool) {
 document.addEventListener('DOMContentLoaded', () => {
   selectSplitPattern(currentSplitPattern);
   selectTrainTool(currentTrainTool);
+  selectPosePrior('exact');
 
   // Drag & drop for file path inputs
   function setupFileDrop(inputId) {
