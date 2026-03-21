@@ -369,12 +369,12 @@
   <a class="nav-item" onclick="showPanel('step6')" data-panel="step6">
     <input type="checkbox" class="nav-check" data-step="6" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s6">6</div>
-    <span class="nav-label">COLMAP変換</span>
+    <span class="nav-label">ツール選択・変換</span>
   </a>
   <a class="nav-item" onclick="showPanel('step7')" data-panel="step7">
     <input type="checkbox" class="nav-check" data-step="7" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s7">7</div>
-    <span class="nav-label">LichtFeld Studioトレーニング</span>
+    <span class="nav-label">3DGSトレーニング</span>
   </a>
 
   <div class="sidebar-section">リファレンス</div>
@@ -805,11 +805,66 @@
     </div>
   </div>
 
-  <!-- ==================== STEP 6: COLMAP変換 ==================== -->
+  <!-- ==================== STEP 6: 3DGSツール選択 ==================== -->
   <div class="panel" id="panel-step6">
-    <h2><span class="step-badge orange">STEP 6</span> COLMAP形式への変換</h2>
-    <p class="desc">RSのCSV + mesh PLY + XMPからCOLMAP形式のファイルを生成します。</p>
-    <div class="time-est">&#x23F1; 所要時間: 数秒</div>
+    <h2><span class="step-badge orange">STEP 6</span> 3DGSトレーニングツール選択 &amp; データ変換</h2>
+    <p class="desc">RSのエクスポートデータを3DGSツールに合わせて変換します。</p>
+    <div class="time-est">&#x23F1; 所要時間: 数秒〜数分</div>
+
+    <div class="card">
+      <h3>トレーニングツールの選択</h3>
+      <div class="choices">
+        <div class="choice" onclick="selectTrainTool('postshot')" id="train-tool-postshot">
+          <div class="choice-title">Postshot</div>
+          <div class="choice-desc">CSV + PLY をそのまま読み込み。変換不要で最も簡単。大規模データセット（数千枚）でも安定。</div>
+          <div class="choice-tag tag-rec">推奨（大規模）</div>
+        </div>
+        <div class="choice selected" onclick="selectTrainTool('lichtfeld')" id="train-tool-lichtfeld">
+          <div class="choice-title">LichtFeld Studio</div>
+          <div class="choice-desc">COLMAP形式に変換が必要。無料・オープンソース。小〜中規模（数百枚）で検証済み。</div>
+          <div class="choice-tag" style="background:rgba(139,92,246,0.15);color:var(--accent2);">無料</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Postshot パターン ===== -->
+    <div id="train-postshot-section">
+      <div class="card">
+        <h3>Postshot: データの準備</h3>
+        <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
+          RSからエクスポートしたCSVとPLYをそのまま使用します。変換は不要です。
+        </p>
+        <ul class="steps-list">
+          <li>RSからエクスポートした <b>CSV</b>（Registration）と <b>PLY</b>（Point Cloud）を用意</li>
+          <li>画像フォルダ（imagesXMP/またはall_merged/）のパスを確認</li>
+          <li>Postshotで <b>Import</b> → CSV + PLY を選択</li>
+          <li>画像フォルダを指定してトレーニング開始</li>
+        </ul>
+      </div>
+
+      <div class="note note-green">
+        <b>メリット:</b> COLMAP変換が不要。座標変換ミスのリスクなし。大規模データ（6,000枚以上）でも安定動作を確認済み。
+      </div>
+
+      <div class="note note-warn">
+        <b>注意:</b> Postshotはサブスクリプション制。無料版はPLYエクスポートに制限あり。
+      </div>
+
+      <details>
+        <summary>新井口PSプロジェクトの点群参考値</summary>
+        <div class="detail-body">
+          <table class="data-table">
+            <tr><th>ファイル</th><th>頂点数</th><th>サイズ</th></tr>
+            <tr><td>all_up.ply</td><td>約485万</td><td>69 MB</td></tr>
+            <tr><td>all_up_down.ply</td><td>約714万</td><td>102 MB</td></tr>
+          </table>
+          <p style="margin-top:8px; font-size:0.8rem; color:var(--text2);">Postshotでは500〜700万頂点程度の点群で十分な品質が得られています。</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- ===== LichtFeld Studio パターン ===== -->
+    <div id="train-lichtfeld-section">
 
     <div class="card">
       <h3>出力ファイル構成</h3>
@@ -886,19 +941,36 @@
         </div>
       </div>
     </details>
+    </div><!-- /train-lichtfeld-section -->
   </div>
 
-  <!-- ==================== STEP 7: LichtFeld Studio ==================== -->
+  <!-- ==================== STEP 7: 3DGSトレーニング ==================== -->
   <div class="panel" id="panel-step7">
-    <h2><span class="step-badge purple">STEP 7</span> LichtFeld Studio 3DGSトレーニング</h2>
-    <p class="desc">COLMAP形式のデータをLichtFeld Studioで読み込み、3D Gaussian Splattingモデルを学習します。</p>
+    <h2><span class="step-badge purple">STEP 7</span> 3DGSトレーニング</h2>
+    <p class="desc">選択したツールで3D Gaussian Splattingモデルを学習します。</p>
     <div class="time-est">&#x23F1; 所要時間: 数十分（画像数・Max Gaussiansによる）</div>
 
-    <div class="card">
-      <h3>操作手順</h3>
+    <!-- Postshot トレーニング設定 -->
+    <div class="card" id="step7-postshot-card">
+      <h3>Postshot トレーニング</h3>
+      <ul class="steps-list">
+        <li>Postshotを起動</li>
+        <li><b>Import</b> → CSV + PLY ファイルを選択</li>
+        <li>画像フォルダを指定</li>
+        <li>トレーニング設定を調整して実行</li>
+        <li>完了後、.ply / .splat としてエクスポート</li>
+      </ul>
+      <div class="note note-green" style="margin-top:10px;">
+        <b>検証済み:</b> 6,546枚 + 疎点群（30MB）で綺麗に動作確認済み。COLMAP変換は不要。
+      </div>
+    </div>
+
+    <!-- LichtFeld Studio トレーニング設定 -->
+    <div class="card" id="step7-lichtfeld-card">
+      <h3>LichtFeld Studio トレーニング</h3>
       <ul class="steps-list">
         <li>LichtFeld Studioを起動</li>
-        <li><b>Open Folder</b> → <code>colmap/</code> フォルダを選択（フラット構成を自動認識）</li>
+        <li><b>Open Folder</b> → <code>colmap/</code> フォルダを選択</li>
         <li>トレーニング設定を調整（下記参照）</li>
         <li><b>Start Training</b> を実行</li>
         <li>完了後、.ply / .splat としてエクスポート</li>
@@ -1202,9 +1274,39 @@ function genStep3Cmd() {
   document.getElementById('cmd-s3').textContent = cmd;
 }
 
+// ============================================================
+// Step 6-7: Training tool selection
+// ============================================================
+let currentTrainTool = 'postshot';
+
+function selectTrainTool(tool) {
+  currentTrainTool = tool;
+  document.querySelectorAll('#panel-step6 > .card:first-of-type .choice').forEach(c => c.classList.remove('selected'));
+  document.getElementById('train-tool-' + tool).classList.add('selected');
+
+  const psSection = document.getElementById('train-postshot-section');
+  const lfSection = document.getElementById('train-lichtfeld-section');
+  const psCard7 = document.getElementById('step7-postshot-card');
+  const lfCard7 = document.getElementById('step7-lichtfeld-card');
+
+  if (tool === 'postshot') {
+    if (psSection) psSection.style.display = 'block';
+    if (lfSection) lfSection.style.display = 'none';
+    if (psCard7) psCard7.style.display = 'block';
+    if (lfCard7) lfCard7.style.display = 'none';
+  } else {
+    if (psSection) psSection.style.display = 'none';
+    if (lfSection) lfSection.style.display = 'block';
+    if (psCard7) psCard7.style.display = 'none';
+    if (lfCard7) lfCard7.style.display = 'block';
+  }
+  saveState();
+}
+
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
   selectSplitPattern(currentSplitPattern);
+  selectTrainTool(currentTrainTool);
 
   // Drag & drop for file path inputs
   function setupFileDrop(inputId) {
