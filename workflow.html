@@ -6,14 +6,20 @@
 <title>360 → 3DGS Workflow Dashboard</title>
 <style>
   :root {
-    --bg: #0f1117; --surface: #1a1d27; --surface2: #232633;
-    --border: #2e3244; --accent: #6c8aff; --accent2: #8b5cf6;
-    --green: #22c55e; --orange: #f59e0b; --red: #ef4444;
+    --bg: #0a0a0f; --surface: #141419; --surface2: #1c1c24;
+    --border: #2a2a35; --accent: #4f7fff; --accent2: #7c5cff;
+    --green: #22c55e; --orange: #f5a623; --red: #ef4444;
     --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
-    --radius: 10px;
+    --radius: 10px; --radius-lg: 12px;
+    --glass: rgba(20,20,25,0.7);
   }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+    min-height: 100vh;
+  }
 
   /* ===== Layout ===== */
   .app { display: flex; height: 100vh; }
@@ -25,12 +31,18 @@
     border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
     overflow-y: auto;
+    backdrop-filter: blur(12px);
   }
   .sidebar-header {
     padding: 20px 16px 16px;
     border-bottom: 1px solid var(--border);
   }
-  .sidebar-title { font-size: 1.1rem; font-weight: 700; }
+  .sidebar-title {
+    font-size: 1.1rem; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
   .sidebar-sub { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
   .sidebar-progress {
     margin-top: 10px;
@@ -57,7 +69,7 @@
     padding: 10px 16px;
     cursor: pointer;
     border-left: 3px solid transparent;
-    transition: all 0.12s;
+    transition: all 0.15s;
     user-select: none;
     text-decoration: none;
     color: var(--text);
@@ -68,20 +80,24 @@
     border-left-color: var(--accent);
   }
   .nav-item.completed .nav-icon { background: rgba(34,197,94,0.15); color: var(--green); }
+  .nav-item.dimmed {
+    opacity: 0.35;
+    pointer-events: none;
+  }
   .nav-icon {
     width: 30px; height: 30px;
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.85rem;
     flex-shrink: 0;
+    font-weight: 600;
   }
-  .nav-icon.s1 { background: rgba(108,138,255,0.15); color: var(--accent); }
-  .nav-icon.s2 { background: rgba(108,138,255,0.15); color: var(--accent); }
-  .nav-icon.s3 { background: rgba(139,92,246,0.15); color: var(--accent2); }
+  .nav-icon.s1 { background: rgba(79,127,255,0.15); color: var(--accent); }
+  .nav-icon.s2 { background: rgba(79,127,255,0.15); color: var(--accent); }
+  .nav-icon.s3 { background: rgba(124,92,255,0.15); color: var(--accent2); }
   .nav-icon.s4 { background: rgba(34,197,94,0.15); color: var(--green); }
-  .nav-icon.s5 { background: rgba(139,92,246,0.15); color: var(--accent2); }
-  .nav-icon.s6 { background: rgba(245,158,11,0.15); color: var(--orange); }
-  .nav-icon.s7 { background: rgba(139,92,246,0.15); color: var(--accent2); }
+  .nav-icon.s5 { background: rgba(124,92,255,0.15); color: var(--accent2); }
+  .nav-icon.s6 { background: rgba(245,166,35,0.15); color: var(--orange); }
   .nav-icon.ref { background: rgba(100,116,139,0.15); color: var(--text3); }
   .nav-label { font-size: 0.82rem; font-weight: 500; flex: 1; }
   .nav-step {
@@ -96,16 +112,16 @@
   }
 
   /* Main content */
-  .main { flex: 1; overflow-y: auto; padding: 28px 40px 60px; max-width: 900px; }
+  .main { flex: 1; overflow-y: auto; padding: 28px 40px 60px; max-width: 960px; }
   .main h2 { font-size: 1.35rem; margin-bottom: 2px; display: flex; align-items: center; gap: 10px; }
   .main .step-badge {
     font-size: 0.7rem; padding: 2px 10px;
     border-radius: 4px; font-weight: 600;
   }
-  .step-badge.blue { background: rgba(108,138,255,0.15); color: var(--accent); }
-  .step-badge.purple { background: rgba(139,92,246,0.15); color: var(--accent2); }
+  .step-badge.blue { background: rgba(79,127,255,0.15); color: var(--accent); }
+  .step-badge.purple { background: rgba(124,92,255,0.15); color: var(--accent2); }
   .step-badge.green { background: rgba(34,197,94,0.15); color: var(--green); }
-  .step-badge.orange { background: rgba(245,158,11,0.15); color: var(--orange); }
+  .step-badge.orange { background: rgba(245,166,35,0.15); color: var(--orange); }
   .main .desc { color: var(--text2); font-size: 0.85rem; margin-bottom: 20px; }
   .main .time-est {
     display: inline-flex; align-items: center; gap: 5px;
@@ -122,14 +138,17 @@
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
     padding: 18px 20px;
     margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: border-color 0.2s;
   }
+  .card:hover { border-color: rgba(79,127,255,0.2); }
   .card h3 { font-size: 0.95rem; margin-bottom: 10px; }
   .card h4 { font-size: 0.85rem; margin-bottom: 6px; color: var(--text2); }
 
-  /* Steps list (within a card) */
+  /* Steps list */
   .steps-list { list-style: none; counter-reset: step; }
   .steps-list li {
     position: relative;
@@ -157,20 +176,21 @@
 
   /* Note/Tip/Warning boxes */
   .note {
-    background: #1c1f2e; border-left: 3px solid var(--accent);
-    padding: 10px 14px; border-radius: 0 6px 6px 0;
+    background: rgba(28,28,46,0.6); border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 0 8px 8px 0;
     font-size: 0.82rem; margin: 12px 0; color: var(--text2);
+    backdrop-filter: blur(4px);
   }
   .note b { color: var(--text); }
-  .note-warn { border-left-color: var(--orange); background: rgba(245,158,11,0.04); }
+  .note-warn { border-left-color: var(--orange); background: rgba(245,166,35,0.04); }
   .note-green { border-left-color: var(--green); background: rgba(34,197,94,0.04); }
   .note-red { border-left-color: var(--red); background: rgba(239,68,68,0.04); }
-  .note-purple { border-left-color: var(--accent2); background: rgba(139,92,246,0.04); }
+  .note-purple { border-left-color: var(--accent2); background: rgba(124,92,255,0.04); }
 
   /* Code block */
   .code-wrap { position: relative; margin: 10px 0; }
   .code-block {
-    background: #0d0f14; border: 1px solid var(--border); border-radius: 6px;
+    background: #08080d; border: 1px solid var(--border); border-radius: 8px;
     padding: 12px 14px; padding-right: 70px;
     font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 0.78rem;
     overflow-x: auto; white-space: pre-wrap; word-break: break-all;
@@ -179,8 +199,8 @@
   .copy-btn {
     position: absolute; top: 8px; right: 8px;
     background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text2); border-radius: 4px; padding: 3px 10px;
-    font-size: 0.72rem; cursor: pointer; transition: all 0.15s;
+    color: var(--text2); border-radius: 6px; padding: 3px 10px;
+    font-size: 0.72rem; cursor: pointer; transition: all 0.2s;
   }
   .copy-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
   .copy-btn.copied { background: var(--green); color: #000; border-color: var(--green); }
@@ -189,7 +209,7 @@
   details {
     margin: 10px 0;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
   }
   details summary {
@@ -200,7 +220,7 @@
     background: var(--surface);
     color: var(--text2);
     user-select: none;
-    transition: background 0.12s;
+    transition: background 0.15s;
   }
   details summary:hover { background: var(--surface2); }
   details summary::marker { color: var(--accent); }
@@ -211,16 +231,16 @@
     background: var(--surface);
   }
 
-  /* Choice cards (radio style) */
+  /* Choice cards */
   .choices { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
   .choice {
     flex: 1; min-width: 160px;
     background: var(--surface2); border: 1.5px solid var(--border);
-    border-radius: 8px; padding: 12px 14px;
-    cursor: pointer; transition: all 0.15s;
+    border-radius: var(--radius); padding: 12px 14px;
+    cursor: pointer; transition: all 0.2s;
   }
-  .choice:hover { border-color: var(--accent); }
-  .choice.selected { border-color: var(--accent); background: rgba(108,138,255,0.06); }
+  .choice:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .choice.selected { border-color: var(--accent); background: rgba(79,127,255,0.06); box-shadow: 0 0 12px rgba(79,127,255,0.1); }
   .choice .choice-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 3px; }
   .choice .choice-desc { font-size: 0.72rem; color: var(--text2); }
   .choice .choice-tag {
@@ -228,7 +248,7 @@
     padding: 1px 6px; border-radius: 3px; margin-top: 6px;
   }
   .choice .tag-rec { background: rgba(34,197,94,0.15); color: var(--green); }
-  .choice .tag-warn { background: rgba(245,158,11,0.15); color: var(--orange); }
+  .choice .tag-warn { background: rgba(245,166,35,0.15); color: var(--orange); }
 
   /* Table */
   .data-table { width: 100%; font-size: 0.8rem; border-collapse: collapse; margin: 8px 0; }
@@ -237,16 +257,8 @@
     border-bottom: 1px solid var(--border);
     color: var(--text2); font-weight: 600; font-size: 0.75rem;
   }
-  .data-table td { padding: 5px 10px; border-bottom: 1px solid rgba(46,50,68,0.5); }
+  .data-table td { padding: 5px 10px; border-bottom: 1px solid rgba(42,42,53,0.5); }
   .data-table tr:hover { background: var(--surface2); }
-
-  /* Connector arrow between steps */
-  .step-connector {
-    display: flex; align-items: center; justify-content: center;
-    padding: 8px 0;
-    color: var(--text3);
-    font-size: 1.2rem;
-  }
 
   /* Form elements */
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -255,22 +267,67 @@
   label { font-size: 0.75rem; color: var(--text2); font-weight: 500; }
   input, select {
     background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 6px; padding: 7px 10px; color: var(--text);
+    border-radius: 8px; padding: 7px 10px; color: var(--text);
     font-size: 0.85rem; font-family: inherit;
+    transition: border-color 0.2s;
   }
-  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 8px rgba(79,127,255,0.15); }
 
   /* Buttons */
   .btn {
     display: inline-flex; align-items: center; gap: 6px;
-    background: var(--accent); color: #fff; border: none; border-radius: 6px;
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
     padding: 8px 18px; font-size: 0.85rem; cursor: pointer;
-    transition: all 0.15s; font-weight: 500;
+    transition: all 0.2s; font-weight: 500;
   }
-  .btn:hover { filter: brightness(1.15); }
+  .btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
   .btn-green { background: var(--green); color: #000; }
   .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
   .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+
+  /* ===== Flow Route Selector ===== */
+  .route-selector {
+    margin-bottom: 20px;
+  }
+  .route-selector h3 {
+    font-size: 0.9rem; font-weight: 600; margin-bottom: 12px;
+    color: var(--text2);
+  }
+  .route-cards { display: flex; gap: 12px; flex-wrap: wrap; }
+  .route-card {
+    flex: 1; min-width: 220px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .route-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .route-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  .route-card.selected {
+    border-color: var(--accent);
+    background: rgba(79,127,255,0.04);
+    box-shadow: 0 0 20px rgba(79,127,255,0.1);
+  }
+  .route-card.selected::before { opacity: 1; }
+  .route-card .rc-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+  .route-card .rc-desc { font-size: 0.72rem; color: var(--text2); line-height: 1.5; }
+  .route-card .rc-tag {
+    display: inline-block; font-size: 0.62rem;
+    padding: 2px 8px; border-radius: 4px; margin-top: 8px;
+    font-weight: 600;
+  }
+  .rc-tag.verified { background: rgba(34,197,94,0.15); color: var(--green); }
+  .rc-tag.new { background: rgba(79,127,255,0.15); color: var(--accent); }
+  .rc-tag.experimental { background: rgba(245,166,35,0.15); color: var(--orange); }
 
   /* Flow overview diagram */
   .flow-overview {
@@ -282,10 +339,12 @@
     background: var(--surface); border: 1.5px solid var(--border);
     border-radius: 8px; padding: 8px 14px;
     text-align: center; min-width: 100px;
-    cursor: pointer; transition: all 0.15s;
+    cursor: pointer; transition: all 0.2s;
   }
   .flow-node:hover { border-color: var(--accent); }
-  .flow-node.done { border-color: var(--green); }
+  .flow-node.active-route { border-color: var(--accent); background: rgba(79,127,255,0.06); }
+  .flow-node.done { border-color: var(--green); background: rgba(34,197,94,0.04); }
+  .flow-node.dimmed { opacity: 0.3; pointer-events: none; }
   .flow-node .fn-num { font-size: 0.65rem; color: var(--text3); }
   .flow-node .fn-label { font-size: 0.75rem; font-weight: 600; }
   .flow-arrow { color: var(--text3); font-size: 1rem; padding: 0 4px; flex-shrink: 0; }
@@ -297,7 +356,7 @@
     background: var(--surface2); color: var(--text2);
     border: 1px solid var(--border);
   }
-  .tag-manual { background: rgba(245,158,11,0.1); color: var(--orange); border-color: rgba(245,158,11,0.3); }
+  .tag-manual { background: rgba(245,166,35,0.1); color: var(--orange); border-color: rgba(245,166,35,0.3); }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -306,6 +365,17 @@
 
   /* Divider */
   hr { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+  /* Inline copy btn (relative positioned) */
+  .copy-btn-inline {
+    position: relative; top: auto; right: auto;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text2); border-radius: 4px; padding: 2px 8px;
+    font-size: 0.68rem; cursor: pointer; transition: all 0.15s;
+    margin-left: 6px; vertical-align: middle;
+  }
+  .copy-btn-inline:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .copy-btn-inline.copied { background: var(--green); color: #000; border-color: var(--green); }
 
   /* Responsive */
   @media (max-width: 900px) {
@@ -317,6 +387,7 @@
     .main { padding: 20px 16px 60px; max-width: 100%; }
     .form-grid { grid-template-columns: 1fr; }
     .choices { flex-direction: column; }
+    .route-cards { flex-direction: column; }
   }
 </style>
 </head>
@@ -329,51 +400,46 @@
     <div class="sidebar-title">360 → 3DGS Workflow</div>
     <div class="sidebar-sub">360度動画から3D Gaussian Splattingを生成するワークフロー</div>
     <div class="sidebar-progress"><div class="sidebar-progress-bar" id="progress-bar" style="width:0%"></div></div>
-    <div class="sidebar-progress-text" id="progress-text">0 / 7 ステップ完了</div>
+    <div class="sidebar-progress-text" id="progress-text">0 / 6 ステップ完了</div>
   </div>
 
   <div class="sidebar-section">概要</div>
   <a class="nav-item active" onclick="showPanel('overview')" data-panel="overview">
     <div class="nav-icon ref">&#x1F4CA;</div>
-    <span class="nav-label">全体フロー</span>
+    <span class="nav-label">全体フロー選択</span>
   </a>
 
   <div class="sidebar-section">ワークフロー</div>
-  <a class="nav-item" onclick="showPanel('step1')" data-panel="step1">
+  <a class="nav-item" onclick="showPanel('step1')" data-panel="step1" data-step-id="step1">
     <input type="checkbox" class="nav-check" data-step="1" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s1">1</div>
     <span class="nav-label">フレーム抽出</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step2')" data-panel="step2">
+  <a class="nav-item" onclick="showPanel('step2')" data-panel="step2" data-step-id="step2">
     <input type="checkbox" class="nav-check" data-step="2" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s2">2</div>
-    <span class="nav-label">Metashapeアライメント</span>
+    <span class="nav-label">Metashape全天球Align</span>
     <span class="tag tag-manual">手動</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step3')" data-panel="step3">
+  <a class="nav-item" onclick="showPanel('step3')" data-panel="step3" data-step-id="step3">
     <input type="checkbox" class="nav-check" data-step="3" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s3">3</div>
-    <span class="nav-label">FFmpeg v360 透視投影分割</span>
+    <span class="nav-label">FFmpeg分割 / LF直接</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step4')" data-panel="step4">
+  <a class="nav-item" onclick="showPanel('step4')" data-panel="step4" data-step-id="step4">
     <input type="checkbox" class="nav-check" data-step="4" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s4">4</div>
-    <span class="nav-label">XMP生成</span>
+    <span class="nav-label">XMP生成 / XML変換</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step5')" data-panel="step5">
+  <a class="nav-item" onclick="showPanel('step5')" data-panel="step5" data-step-id="step5">
     <input type="checkbox" class="nav-check" data-step="5" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s5">5</div>
-    <span class="nav-label">RSアライメント + Mesh</span>
+    <span class="nav-label">RS Align / MS最適化</span>
     <span class="tag tag-manual">手動</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step6')" data-panel="step6">
+  <a class="nav-item" onclick="showPanel('step6')" data-panel="step6" data-step-id="step6">
     <input type="checkbox" class="nav-check" data-step="6" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s6">6</div>
-    <span class="nav-label">ツール選択・変換</span>
-  </a>
-  <a class="nav-item" onclick="showPanel('step7')" data-panel="step7">
-    <input type="checkbox" class="nav-check" data-step="7" onclick="event.stopPropagation(); updateProgress();">
-    <div class="nav-icon s7">7</div>
     <span class="nav-label">3DGSトレーニング</span>
   </a>
 
@@ -393,56 +459,52 @@
 
   <!-- ==================== Overview ==================== -->
   <div class="panel active" id="panel-overview">
-    <h2>全体ワークフロー</h2>
-    <p class="desc">360度動画から3D Gaussian Splattingを生成する全7ステップ。2026-03-20テスト済み。</p>
+    <h2>全体フロー選択</h2>
+    <p class="desc">3つのワークフロールートから選択してください。選択したルートのステップのみがアクティブになります。</p>
 
-    <div class="flow-overview">
-      <div class="flow-node" onclick="showPanel('step1')"><div class="fn-num">STEP 1</div><div class="fn-label">フレーム抽出</div></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node" onclick="showPanel('step2')"><div class="fn-num">STEP 2</div><div class="fn-label">Metashape</div></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node" onclick="showPanel('step3')"><div class="fn-num">STEP 3</div><div class="fn-label">8方向分割</div></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node" onclick="showPanel('step4')"><div class="fn-num">STEP 4</div><div class="fn-label">XMP生成</div></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node" onclick="showPanel('step5')"><div class="fn-num">STEP 5</div><div class="fn-label">RS + Mesh</div></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node" onclick="showPanel('step6')"><div class="fn-num">STEP 6</div><div class="fn-label">COLMAP変換</div></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-node" onclick="showPanel('step7')"><div class="fn-num">STEP 7</div><div class="fn-label">3DGS学習</div></div>
+    <!-- Route Selector -->
+    <div class="route-selector">
+      <h3>ワークフロールート</h3>
+      <div class="route-cards">
+        <div class="route-card selected" onclick="selectRoute(1)" id="route-card-1">
+          <div class="rc-title">ルート1: RS経由</div>
+          <div class="rc-desc">
+            フレーム抽出 → Metashape全天球Align → FFmpeg分割 → XMP生成 → RSでAlign+Mesh → Postshot/LichtFeld
+          </div>
+          <span class="rc-tag verified">検証済み</span>
+        </div>
+        <div class="route-card" onclick="selectRoute(2)" id="route-card-2">
+          <div class="rc-title">ルート2: Metashape最適化</div>
+          <div class="rc-desc">
+            フレーム抽出 → Metashape全天球Align → FFmpeg分割 → XML変換 → Metashapeカメラ最適化 → Postshot
+          </div>
+          <span class="rc-tag new">新規</span>
+        </div>
+        <div class="route-card" onclick="selectRoute(3)" id="route-card-3">
+          <div class="rc-title">ルート3: 全天球直接</div>
+          <div class="rc-desc">
+            フレーム抽出 → Metashape全天球Align → LichtFeld Studio (GUT有効)
+          </div>
+          <span class="rc-tag experimental">実験的</span>
+        </div>
+      </div>
     </div>
 
+    <!-- Flow visualization -->
     <div class="card">
-      <h3>概要サマリー</h3>
-      <table class="data-table">
-        <tr><th>ステップ</th><th>ツール</th><th>入力</th><th>出力</th><th>時間目安</th></tr>
-        <tr><td>1. フレーム抽出</td><td>FFmpeg</td><td>360度動画</td><td>全天球フレーム (7680x3840)</td><td>数分</td></tr>
-        <tr><td>2. Metashape</td><td>Metashape</td><td>全天球フレーム</td><td>camera.xml</td><td>5-15分</td></tr>
-        <tr><td>3. 8方向分割</td><td>FFmpeg v360</td><td>全天球フレーム</td><td>透視投影画像 (1920x1920)</td><td>数分-数十分</td></tr>
-        <tr><td>4. XMP生成</td><td>Python</td><td>camera.xml</td><td>.xmp サイドカー</td><td>数秒</td></tr>
-        <tr><td>5. RS + Mesh</td><td>RealityCapture</td><td>画像 + XMP</td><td>CSV + mesh PLY</td><td>~10分/エリア</td></tr>
-        <tr><td>6. COLMAP変換</td><td>Python</td><td>CSV + PLY + XMP</td><td>COLMAP形式</td><td>数秒</td></tr>
-        <tr><td>7. 3DGS学習</td><td>LichtFeld Studio</td><td>colmap/フォルダ</td><td>3DGS (.ply / .splat)</td><td>数十分</td></tr>
-      </table>
+      <h3>選択中のフロー</h3>
+      <div class="flow-overview" id="flow-overview">
+        <!-- populated by JS -->
+      </div>
     </div>
 
-    <div class="card">
-      <h3>エリア分割オプション</h3>
-      <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
-        フレーム数が多い場合はエリアに分割してRSで処理する。すべての分割パターンで2フレームのオーバーラップを入れて将来のマージに備える。
-      </p>
-      <table class="data-table">
-        <tr><th>分割数</th><th>1エリアのフレーム数</th><th>RS処理時間/エリア</th><th>PLYサイズ</th><th>備考</th></tr>
-        <tr style="background:rgba(34,197,94,0.05);">
-          <td><b>24分割</b></td><td>~42-46枚</td><td>~10分</td><td>~800MB</td><td style="color:var(--green);">推奨 - そのまま使える</td>
-        </tr>
-        <tr><td>12分割</td><td>~86-89枚</td><td>~20分</td><td>~1.5GB</td><td>中規模向け</td></tr>
-        <tr><td>2分割</td><td>~500枚</td><td>~60分+</td><td>~6GB</td><td style="color:var(--orange);">PLYダウンサンプリング必要</td></tr>
-      </table>
+    <!-- Summary table -->
+    <div class="card" id="overview-summary">
+      <!-- populated by JS -->
     </div>
 
     <div class="note note-green">
-      <b>確認済み:</b> このワークフロー全体が2026-03-20にテスト・動作確認済みです。各ステップの詳細は左のメニューから確認できます。
+      <b>確認済み:</b> ルート1は2026-03-20にテスト・動作確認済みです。ルート2,3は検証進行中です。
     </div>
 
     <hr>
@@ -450,7 +512,7 @@
     <div class="card">
       <h3>ワークフロー指示書をコピー</h3>
       <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
-        現在のワークフローをテキストとしてコピーできます。チャットやドキュメントに貼り付けて作業指示として使えます。
+        現在選択中のルートをテキストとしてコピーできます。
       </p>
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
         <button class="btn btn-sm" onclick="copyWorkflow('full')">全体フロー</button>
@@ -464,7 +526,7 @@
     </div>
   </div>
 
-  <!-- ==================== STEP 1: フレーム抽出 ==================== -->
+  <!-- ==================== STEP 1: フレーム抽出 (all routes) ==================== -->
   <div class="panel" id="panel-step1">
     <h2><span class="step-badge blue">STEP 1</span> フレーム抽出</h2>
     <p class="desc">360度動画から全天球（equirectangular）フレームを抽出します。</p>
@@ -484,10 +546,7 @@
       <div class="form-grid">
         <div class="form-group full">
           <label>入力動画パス（ファイルをここにドラッグ＆ドロップ可能）</label>
-          <div id="s1-video-drop" style="position:relative;">
-            <input type="text" id="s1-video" placeholder="F:\source\360video.mp4" style="width:100%;">
-            <div id="s1-video-dropzone" style="display:none; position:absolute; inset:0; background:rgba(108,138,255,0.15); border:2px dashed var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; pointer-events:none; font-size:0.85rem; color:var(--accent);">ドロップしてパスを挿入</div>
-          </div>
+          <input type="text" id="s1-video" placeholder="F:\source\360video.mp4" style="width:100%;">
         </div>
         <div class="form-group full">
           <label>出力フォルダ (images_S/)</label>
@@ -526,10 +585,10 @@
     </div>
   </div>
 
-  <!-- ==================== STEP 2: Metashape ==================== -->
+  <!-- ==================== STEP 2: Metashape全天球Sphericalアライメント (all routes) ==================== -->
   <div class="panel" id="panel-step2">
-    <h2><span class="step-badge blue">STEP 2</span> Metashape Sphericalアライメント</h2>
-    <p class="desc">全天球画像のカメラ位置を推定し、camera.xmlをエクスポートします。位置推定のみ行います。</p>
+    <h2><span class="step-badge blue">STEP 2</span> Metashape全天球Sphericalアライメント</h2>
+    <p class="desc">全天球画像のカメラ位置を推定し、camera.xmlとPLYをエクスポートします。</p>
     <div class="time-est">&#x23F1; 所要時間: 5-15分（画像数による） &nbsp; <span class="tag tag-manual">手動操作</span></div>
 
     <div class="card">
@@ -537,14 +596,30 @@
       <ul class="steps-list">
         <li>Metashapeを起動 → <b>Workflow → Add Photos</b> → <code>images_S/</code> の全画像を追加</li>
         <li>Camera Calibration → Camera Type を <b>Spherical</b> に変更</li>
-        <li><b>Workflow → Align Photos</b> を実行（デフォルト設定でOK）</li>
+        <li><b>Workflow → Align Photos</b> を実行</li>
         <li>アライメント結果を確認（全画像がアライメントされているか）</li>
-        <li><b>File → Export → Export Cameras</b> → <code>Spherical/camera.xml</code> として保存</li>
+        <li><b>File → Export → Export Cameras</b> → <code>camera.xml</code> として保存</li>
+        <li>PLYもエクスポート（点群データ）</li>
       </ul>
     </div>
 
+    <div class="card">
+      <h3>推奨設定</h3>
+      <table class="data-table">
+        <tr><th>項目</th><th>推奨値</th><th>備考</th></tr>
+        <tr><td>精度</td><td><b>高</b></td><td>精度=高 でアライメント</td></tr>
+        <tr><td>座標事前選択</td><td><b>推定値</b></td><td>連番は端が合わない傾向あり、推定値を推奨</td></tr>
+        <tr><td>キーポイント上限</td><td><b>40,000</b></td><td>デフォルトより多め</td></tr>
+        <tr><td>タイポイント上限</td><td><b>4,000</b></td><td>デフォルトより多め</td></tr>
+      </table>
+    </div>
+
+    <div class="note note-warn">
+      <b>注意:</b> 連番画像は端（先頭と末尾のフレーム）が合わない傾向があります。座標事前選択を「推定値」にすることを推奨します。
+    </div>
+
     <div class="note note-green">
-      <b>ポイント:</b> Metashapeは位置推定（カメラの座標と向き）のみに使います。メッシュや点群はここでは生成しません。
+      <b>出力:</b> camera.xml（カメラ位置・回転行列）+ PLY（点群データ）
     </div>
 
     <details>
@@ -556,505 +631,489 @@
           <li>回転行列: c2w (camera-to-chunk)</li>
           <li>位置: chunk座標系でのカメラ中心</li>
         </ul>
-        <p style="margin-top:8px;">この情報はSTEP 4のXMP生成で使用されます。後続ステップではRealityCapture (Y-up) に変換する必要があります。</p>
+        <p style="margin-top:8px;">この情報は後続ステップのXMP生成やXML変換で使用されます。</p>
       </div>
     </details>
-
-    <div class="note note-warn">
-      <b>注意:</b> Metashape Standard版でも360アライメントは可能です。Professional版は必要ありません。
-    </div>
   </div>
 
-  <!-- ==================== STEP 3: FFmpeg 8方向分割 ==================== -->
+  <!-- ==================== STEP 3: Route 1,2 = FFmpeg分割 / Route 3 = LF直接 ==================== -->
   <div class="panel" id="panel-step3">
-    <h2><span class="step-badge purple">STEP 3</span> FFmpeg v360 透視投影分割</h2>
-    <p class="desc">equirectangular画像をFFmpegのv360フィルタで透視投影（perspective）画像に分割します。</p>
-    <div class="time-est">&#x23F1; 所要時間: 数分〜数十分（画像数による）</div>
 
-    <div class="card">
-      <h3>分割パターンの選択</h3>
-      <div class="choices">
-        <div class="choice selected" onclick="selectSplitPattern('A')" id="split-pattern-A">
-          <div class="choice-title">パターンA: 計8枚/フレーム <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向に分割してください。45度間隔（0,45,90,135,180,225,270,315度）、pitch=0、FOV90度、1920x1920px。', this)">Copy</button></div>
-          <div class="choice-desc">
-            <b>水平8枚</b>（45度間隔、pitch=0°）<br>
-            上下なし
+    <!-- Route 1,2: FFmpeg v360透視投影分割 -->
+    <div id="step3-ffmpeg" class="route-content" data-routes="1,2">
+      <h2><span class="step-badge purple">STEP 3</span> FFmpeg v360透視投影分割</h2>
+      <p class="desc">equirectangular画像をFFmpegのv360フィルタで透視投影（perspective）画像に分割します。</p>
+      <div class="time-est">&#x23F1; 所要時間: ~1秒/画像</div>
+
+      <div class="card">
+        <h3>分割パターンの選択</h3>
+        <div class="choices">
+          <div class="choice selected" onclick="selectSplitPattern('A')" id="split-pattern-A">
+            <div class="choice-title">パターンA: 8h = 8枚/frame
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('FFmpegで水平8方向に分割。45度間隔（0,45,90,135,180,225,270,315度）、pitch=0、FOV90度、1920x1920px。命名: {frame}_{h}{angle}.jpg', this)">Copy</button>
+            </div>
+            <div class="choice-desc">
+              <b>水平8枚</b>（45度間隔、pitch=0度）
+            </div>
+            <div class="choice-tag tag-rec">基本</div>
           </div>
-          <div class="choice-tag tag-rec">基本</div>
-        </div>
-        <div class="choice" onclick="selectSplitPattern('B')" id="split-pattern-B">
-          <div class="choice-title">パターンB: 計12枚/フレーム <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで計12方向に分割してください。水平8枚(45度間隔,pitch=0)、下2枚(前後yaw=0,180,pitch=-30)、上2枚(左右yaw=90,270,pitch=+30)。FOV90度、1920x1920px。', this)">Copy</button></div>
-          <div class="choice-desc">
-            <b>水平8枚</b>（45度間隔、pitch=0°）<br>
-            <b>下2枚</b>（前後 yaw=0°,180° / pitch=-30°）<br>
-            <b>上2枚</b>（左右 yaw=90°,270° / pitch=+30°）
+          <div class="choice" onclick="selectSplitPattern('B')" id="split-pattern-B">
+            <div class="choice-title">パターンB: 8h+2d+2u = 12枚/frame
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('FFmpegで計12方向に分割。水平8枚(45度間隔,pitch=0)、下2枚(yaw=0,180,pitch=-30)、上2枚(yaw=90,270,pitch=+30)。FOV90度、1920x1920px。命名: {frame}_{h/u/d}{angle}.jpg', this)">Copy</button>
+            </div>
+            <div class="choice-desc">
+              <b>水平8枚</b> + <b>下2枚</b>（前後pitch=-30度） + <b>上2枚</b>（左右pitch=+30度）
+            </div>
+            <div class="choice-tag" style="background:rgba(124,92,255,0.15);color:var(--accent2);">高品質</div>
           </div>
-          <div class="choice-tag" style="background:rgba(139,92,246,0.15);color:var(--accent2);">高品質</div>
-        </div>
-        <div class="choice" onclick="selectSplitPattern('C')" id="split-pattern-C">
-          <div class="choice-title">パターンC: 計16枚/フレーム <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで計16方向に分割してください。水平8枚(45度間隔,pitch=0)、上4枚(yaw=0,90,180,270,pitch=+30)、下4枚(yaw=0,90,180,270,pitch=-30)。FOV90度、1920x1920px。', this)">Copy</button></div>
-          <div class="choice-desc">
-            <b>水平8枚</b>（45度間隔、pitch=0°）<br>
-            <b>上4枚</b>（yaw=0°,90°,180°,270° / pitch=+30°）<br>
-            <b>下4枚</b>（yaw=0°,90°,180°,270° / pitch=-30°）
+          <div class="choice" onclick="selectSplitPattern('C')" id="split-pattern-C">
+            <div class="choice-title">パターンC: 8h+4u+4d = 16枚/frame
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('FFmpegで計16方向に分割。水平8枚(45度間隔,pitch=0)、上4枚(yaw=0,90,180,270,pitch=+30)、下4枚(yaw=0,90,180,270,pitch=-30)。FOV90度、1920x1920px。命名: {frame}_{h/u/d}{angle}.jpg', this)">Copy</button>
+            </div>
+            <div class="choice-desc">
+              <b>水平8枚</b> + <b>上4枚</b>（pitch=+30度） + <b>下4枚</b>（pitch=-30度）
+            </div>
+            <div class="choice-tag" style="background:rgba(245,166,35,0.15);color:var(--orange);">最高品質</div>
           </div>
-          <div class="choice-tag" style="background:rgba(245,158,11,0.15);color:var(--orange);">最高品質</div>
         </div>
       </div>
-      <div class="note note-green" style="margin-top:10px;">
-        <b>参考:</b> lileaLabのスライド(P.28)によると、斜め方向を加えた構成はオーバーラップが増え、カメラ最適化品質が向上します。
-        水平4方向のみ(△)に対し、8方向+斜め(◎)が推奨されています。
-      </div>
-    </div>
 
-    <div class="card">
-      <h3>画像枚数の計算</h3>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>フレーム数（手動入力）</label>
-          <input type="number" id="s3-frame-count" value="1010" min="1" oninput="calcSplitTotal()">
+      <div class="card">
+        <h3>画像枚数の計算</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>フレーム数（手動入力）</label>
+            <input type="number" id="s3-frame-count" value="1010" min="1" oninput="calcSplitTotal()">
+          </div>
+          <div class="form-group">
+            <label>選択パターン</label>
+            <input type="text" id="s3-pattern-display" value="パターンA: 8枚/フレーム" readonly style="background:var(--bg); color:var(--text2);">
+          </div>
         </div>
-        <div class="form-group">
-          <label>選択パターン</label>
-          <input type="text" id="s3-pattern-display" value="パターンA: 8枚/フレーム" readonly style="background:var(--bg); color:var(--text2);">
+        <div id="split-calc-result" style="margin-top:12px; padding:14px; background:var(--surface2); border-radius:var(--radius); font-size:0.9rem;">
         </div>
       </div>
-      <div id="split-calc-result" style="margin-top:12px; padding:14px; background:var(--surface2); border-radius:var(--radius); font-size:0.9rem;">
-      </div>
-    </div>
 
-    <div class="card">
-      <h3>出力仕様</h3>
-      <table class="data-table" id="split-spec-table">
-        <tr><th>項目</th><th>値</th></tr>
-        <tr><td>FOV</td><td>90度</td></tr>
-        <tr><td>解像度</td><td>1920 x 1920 px</td></tr>
-        <tr><td>命名規則</td><td><code>{フレーム}_{h/u/d}{角度}.jpg</code></td></tr>
-      </table>
-      <table class="data-table" style="margin-top:10px;">
-        <tr><th>接頭辞</th><th>意味</th><th>pitch</th><th>例</th></tr>
-        <tr><td><code>h</code></td><td>水平 (horizontal)</td><td>0°</td><td><code>0001_h000.jpg</code> 〜 <code>0001_h315.jpg</code></td></tr>
-        <tr><td><code>u</code></td><td>上 (up)</td><td>+30°</td><td><code>0001_u000.jpg</code> 〜 <code>0001_u270.jpg</code></td></tr>
-        <tr><td><code>d</code></td><td>下 (down)</td><td>-30°</td><td><code>0001_d000.jpg</code> 〜 <code>0001_d270.jpg</code></td></tr>
-      </table>
-      <div class="note" style="margin-top:10px;">
-        <b>フォルダ表示順:</b> h→u→dの順にソートされます。<br>
-        <b>注意:</b> FFmpeg v360のyaw範囲は-180〜180。225→-135, 270→-90, 315→-45に内部変換が必要。
-      </div>
-      <div id="split-directions-detail" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="card">
-      <h3>コマンド生成</h3>
-      <div class="form-grid">
-        <div class="form-group full">
-          <label>入力フォルダ (images_S/)</label>
-          <input type="text" id="s3-input" placeholder="F:\project\images_S">
-        </div>
-        <div class="form-group full">
-          <label>出力フォルダ (images_P/)</label>
-          <input type="text" id="s3-output" placeholder="F:\project\images_P">
-        </div>
-      </div>
-      <div style="margin-top:10px">
-        <button class="btn btn-sm" onclick="genStep3Cmd()">FFmpegコマンド例</button>
-      </div>
-      <div class="code-wrap">
-        <div class="code-block" id="cmd-s3"><span style="color:var(--text3)">上のボタンでコマンドを生成</span></div>
-        <button class="copy-btn" onclick="copyCode('cmd-s3')">Copy</button>
-      </div>
-    </div>
-
-    <div class="note">
-      <b>重要:</b> 全方向すべて同じ中心点（カメラ位置）から撮影したものとして扱います。オフセットは入れません。
-    </div>
-
-    <details>
-      <summary>パターンBの方向一覧（12方向）</summary>
-      <div class="detail-body">
+      <div class="card">
+        <h3>出力仕様・命名規則</h3>
         <table class="data-table">
-          <tr><th>#</th><th>Yaw (水平)</th><th>Pitch (垂直)</th><th>説明</th></tr>
-          <tr><td>1-8</td><td>0, 45, 90, 135, 180, 225, 270, 315</td><td>0°</td><td>水平8方向</td></tr>
-          <tr><td>9</td><td>0° (前方)</td><td>-30°</td><td>前方30度見下げ</td></tr>
-          <tr><td>10</td><td>180° (後方)</td><td>-30°</td><td>後方30度見下げ</td></tr>
-          <tr><td>11</td><td>90° (右)</td><td>+30°</td><td>右30度見上げ</td></tr>
-          <tr><td>12</td><td>270° (左)</td><td>+30°</td><td>左30度見上げ</td></tr>
+          <tr><th>項目</th><th>値</th></tr>
+          <tr><td>FOV</td><td>90度</td></tr>
+          <tr><td>解像度</td><td>1920 x 1920 px</td></tr>
+          <tr><td>命名規則</td><td><code>{frame}_{h/u/d}{angle}.jpg</code></td></tr>
         </table>
-        <div class="note" style="margin-top:8px;">
-          pitch=-30° は下方向を見ます（地面寄り）。pitch=+30° は上方向（空・建物上部寄り）。<br>
-          これにより垂直方向のオーバーラップが増え、3Dポイントのマッチング精度が上がります。
+        <table class="data-table" style="margin-top:10px;">
+          <tr><th>接頭辞</th><th>意味</th><th>pitch</th><th>例</th></tr>
+          <tr><td><code>h</code></td><td>horizontal (水平)</td><td>0度</td><td><code>0001_h000.jpg</code> 〜 <code>0001_h315.jpg</code></td></tr>
+          <tr><td><code>u</code></td><td>up (上)</td><td>+30度</td><td><code>0001_u000.jpg</code> 〜 <code>0001_u270.jpg</code></td></tr>
+          <tr><td><code>d</code></td><td>down (下)</td><td>-30度</td><td><code>0001_d000.jpg</code> 〜 <code>0001_d270.jpg</code></td></tr>
+        </table>
+        <div class="note" style="margin-top:10px;">
+          <b>FFmpeg yaw範囲:</b> -180 〜 180。変換: 225→-135, 270→-90, 315→-45
+        </div>
+        <div id="split-directions-detail" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="card">
+        <h3>コマンド生成</h3>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>入力フォルダ (images_S/)</label>
+            <input type="text" id="s3-input" placeholder="F:\project\images_S">
+          </div>
+          <div class="form-group full">
+            <label>出力フォルダ (images_P/)</label>
+            <input type="text" id="s3-output" placeholder="F:\project\images_P">
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <button class="btn btn-sm" onclick="genStep3Cmd()">FFmpegコマンド例</button>
+        </div>
+        <div class="code-wrap">
+          <div class="code-block" id="cmd-s3"><span style="color:var(--text3)">上のボタンでコマンドを生成</span></div>
+          <button class="copy-btn" onclick="copyCode('cmd-s3')">Copy</button>
         </div>
       </div>
-    </details>
 
-    <details>
-      <summary>FFmpeg v360フィルタの詳細</summary>
-      <div class="detail-body">
-        <p>FFmpegの <code>v360</code> フィルタは equirectangular → flat (perspective) 変換を行います。</p>
-        <div class="code-wrap">
-          <div class="code-block" id="cmd-s3-detail">ffmpeg -i input.jpg -vf "v360=equirect:flat:h_fov=90:v_fov=90:yaw=0:pitch=0:roll=0,scale=1920:1920" -frames:v 1 -q:v 2 output.jpg
+      <details>
+        <summary>FFmpeg v360フィルタの詳細</summary>
+        <div class="detail-body">
+          <p>FFmpegの <code>v360</code> フィルタは equirectangular → flat (perspective) 変換を行います。</p>
+          <div class="code-wrap">
+            <div class="code-block" id="cmd-s3-detail">ffmpeg -i input.jpg -vf "v360=equirect:flat:h_fov=90:v_fov=90:yaw=0:pitch=0:roll=0,scale=1920:1920" -frames:v 1 -q:v 2 output.jpg
 
 # yaw: 水平方向の角度 (0, 45, 90, ... 315)
 # pitch: 垂直方向の角度 (0=水平, -30=下, +30=上)
 # roll: 回転 (常に0)
 # h_fov/v_fov: 水平/垂直視野角</div>
-          <button class="copy-btn" onclick="copyCode('cmd-s3-detail')">Copy</button>
-        </div>
-      </div>
-    </details>
-  </div>
-
-  <!-- ==================== STEP 4: XMP生成 ==================== -->
-  <div class="panel" id="panel-step4">
-    <h2><span class="step-badge green">STEP 4</span> XMP生成（XML → XMP変換）</h2>
-    <p class="desc">Metashapeのcamera.xmlから各透視投影画像のXMPサイドカーファイルを生成します。</p>
-    <div class="time-est">&#x23F1; 所要時間: 数秒</div>
-
-    <div class="card">
-      <h3>変換内容</h3>
-      <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
-        Metashapeの c2w 行列をトランスポーズして w2c に変換し、RealityCapture用のXMP形式で書き出します。
-      </p>
-      <table class="data-table">
-        <tr><th>項目</th><th>値</th></tr>
-        <tr><td>xcr:Rotation</td><td>c2w → <b>転置して w2c</b>、行優先9値</td></tr>
-        <tr><td>PosePrior</td><td><b>exact</b>（相対位置を維持）</td></tr>
-        <tr><td>CalibrationPrior</td><td><b>exact</b></td></tr>
-        <tr><td>中心点</td><td>8方向すべて同一（オフセットなし）</td></tr>
-      </table>
-    </div>
-
-    <div class="card">
-      <h3>PosePriorの選択肢</h3>
-      <div class="choices">
-        <div class="choice selected" onclick="selectChoice(this)">
-          <div class="choice-title">exact <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('XMP設定をexactで生成してください。PosePrior=exact, CalibrationPrior=exact。相対位置を維持し、RSが大きく動かさない安定モードです。', this)">Copy</button></div>
-          <div class="choice-desc">相対位置を維持。RSが大きく動かさない。安定。</div>
-          <div class="choice-tag tag-rec">推奨</div>
-        </div>
-        <div class="choice" onclick="selectChoice(this)">
-          <div class="choice-title">initial <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('XMP設定をinitialで生成してください。PosePrior=initial, CalibrationPrior=initial。RSが特徴点ベースで位置・向きを自由に微調整します。ただしスプリット（分離）する場合あり。', this)">Copy</button></div>
-          <div class="choice-desc">RSが自由に調整可能。スプリットが起きる場合あり。</div>
-          <div class="choice-tag tag-warn">不安定な場合あり</div>
-        </div>
-        <div class="choice" onclick="selectChoice(this)">
-          <div class="choice-title">locked <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('XMP設定をlockedで生成してください。PosePrior=locked, CalibrationPrior=locked。カメラ位置を完全に固定し、RSは一切変更しません。', this)">Copy</button></div>
-          <div class="choice-desc">完全に固定。RSは位置を一切変更しない。</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="note note-green">
-      <b>テスト結果:</b> <code>exact</code> モードが最も安定。<code>initial</code> はRSが位置を調整してスプリット（分離）する場合があります。
-    </div>
-
-    <details>
-      <summary>座標変換の技術詳細</summary>
-      <div class="detail-body">
-        <p><b>Metashape → RS の座標変換:</b></p>
-        <ul style="margin:8px 0 8px 20px; font-size:0.82rem; line-height:1.8;">
-          <li><b>Metashape:</b> Z-up, c2w, OpenCVカメラ (X右, Y下, Z前方)</li>
-          <li><b>RS XMP:</b> Y-up, c2w → 転置して w2c を格納</li>
-          <li>回転行列の変換: <code>R_rs = [ R[0], -R[2], R[1] ]</code></li>
-          <li>位置の変換: <code>(x, y, z) → (x, -z, y)</code></li>
-        </ul>
-        <p style="margin-top:8px;"><b>変換行列 S':</b> <code>[[1,0,0], [0,0,-1], [0,1,0]]</code></p>
-        <ol style="margin:8px 0 8px 20px; font-size:0.82rem; line-height:1.8;">
-          <li>c2w回転にyaw回転を適用: <code>R = R_c2w @ R_yaw(angle)</code></li>
-          <li>row0 = R[0] そのまま</li>
-          <li>row1 = -R[2] (Z-upのZ軸反転)</li>
-          <li>row2 = R[1] (Z-upのY軸)</li>
-        </ol>
-        <div class="note" style="margin-top:12px;">
-          <b>回転診断結果:</b> Pattern I (c2w + 行1,2反転) がRSの正解データと一致。<br>
-          roll差分誤差: &lt; 0.1度 / 絶対roll誤差: &lt; 0.8度
-        </div>
-      </div>
-    </details>
-
-    <details>
-      <summary>xcr:Rotation の格納形式</summary>
-      <div class="detail-body">
-        <p><code>xcr:Rotation</code> には <b>c2w (camera-to-world)</b> の回転行列が行優先 (row-major) で9値格納されています。</p>
-        <p style="margin-top:8px;">RSに渡す際は転置して w2c にする必要があります。ただし、STEP 6のCOLMAP変換時はXMP内の値はすでに w2c なので<b>再転置は不要</b>です。</p>
-      </div>
-    </details>
-  </div>
-
-  <!-- ==================== STEP 5: RS Align + Mesh ==================== -->
-  <div class="panel" id="panel-step5">
-    <h2><span class="step-badge purple">STEP 5</span> RealityCapture アライメント + メッシュ</h2>
-    <p class="desc">XMP付き画像をRealityCaptureに読み込み、Align → Mesh構築 → CSV + mesh PLY エクスポート。</p>
-    <div class="time-est">&#x23F1; 所要時間: Align ~1分/エリア + Mesh ~8分/エリア（24分割時） &nbsp; <span class="tag tag-manual">手動操作</span></div>
-
-    <div class="card">
-      <h3>操作手順</h3>
-      <ul class="steps-list">
-        <li>エリア分割した画像フォルダをRSに読み込み（2フレームオーバーラップ付き）。XMPは自動検出される</li>
-        <li>Align Settings → Use Camera Metadata: <b>Exact</b> に設定</li>
-        <li><b>Align Photos</b> を実行（~1分/エリア）</li>
-        <li>8方向が正しく展開されているか目視確認</li>
-        <li><b>Mesh</b> を <b>High Detail</b> で構築（~8分/エリア）</li>
-        <li>Registration を <b>CSV</b> でエクスポート（カメラ位置情報）</li>
-        <li>Mesh を <b>PLY</b> でエクスポート（密な点群として使用）</li>
-      </ul>
-    </div>
-
-    <div class="note note-red">
-      <b>重要: Align-onlyのsparse点群ではダメ!</b><br>
-      アライメントのみで得られるsparse点群でスプラッティングを行うと結果が崩壊します。必ずMesh PLYを使ってください。
-    </div>
-
-    <div class="card">
-      <h3>PLYサイズ制限</h3>
-      <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
-        Mesh PLYはfloat色+面情報を含むため、COLMAP用に点群形式（uchar色、面なし）に変換する必要があります。
-      </p>
-      <table class="data-table">
-        <tr><th>エリア規模</th><th>画像数</th><th>mesh PLYサイズ</th><th>状態</th></tr>
-        <tr style="background:rgba(34,197,94,0.05);">
-          <td>小エリア（24分割）</td><td>~700枚</td><td>~800MB</td><td style="color:var(--green);">そのまま使用可能</td>
-        </tr>
-        <tr><td>大エリア（2分割）</td><td>~4000枚</td><td>~6GB</td><td style="color:var(--orange);">ダウンサンプリング必要</td></tr>
-      </table>
-    </div>
-
-    <details>
-      <summary>PLYダウンサンプリングの詳細（大エリアの場合）</summary>
-      <div class="detail-body">
-        <p>大きなmesh PLY（~6GB）は直接使用できないため、頂点をダウンサンプリングします。</p>
-        <table class="data-table">
-          <tr><th>サンプリング率</th><th>頂点数</th><th>ファイルサイズ</th><th>結果</th></tr>
-          <tr><td>1/2</td><td>~6500万</td><td>~937MB</td><td style="color:var(--red);">失敗</td></tr>
-          <tr style="background:rgba(34,197,94,0.05);"><td>1/3</td><td>~4400万</td><td>~625MB</td><td style="color:var(--green);">OK</td></tr>
-          <tr style="background:rgba(34,197,94,0.05);"><td>1/4</td><td>~3300万</td><td>~469MB</td><td style="color:var(--green);">OK</td></tr>
-        </table>
-        <div class="note" style="margin-top:10px;">
-          <b>上限目安:</b> ~4000-5000万頂点、600-700MB程度が上限。
-        </div>
-      </div>
-    </details>
-
-    <details>
-      <summary>RSのCOLMAPネイティブエクスポートについて</summary>
-      <div class="detail-body">
-        <div class="note note-red">
-          <b>使わないこと:</b> RSのCOLMAPエクスポート機能は1画像しかエクスポートしません。STEP 6の手動COLMAP変換を使ってください。
-        </div>
-      </div>
-    </details>
-
-    <div class="note note-warn">
-      <b>"initial" vs "exact":</b> <code>initial</code> だとRSがカメラ位置を自由に調整するため、画像グループがスプリット（分離）する場合があります。<code>exact</code> は相対位置を維持するため安定です。
-    </div>
-  </div>
-
-  <!-- ==================== STEP 6: 3DGSツール選択 ==================== -->
-  <div class="panel" id="panel-step6">
-    <h2><span class="step-badge orange">STEP 6</span> 3DGSトレーニングツール選択 &amp; データ変換</h2>
-    <p class="desc">RSのエクスポートデータを3DGSツールに合わせて変換します。</p>
-    <div class="time-est">&#x23F1; 所要時間: 数秒〜数分</div>
-
-    <div class="card">
-      <h3>トレーニングツールの選択</h3>
-      <div class="choices">
-        <div class="choice" onclick="selectTrainTool('postshot')" id="train-tool-postshot">
-          <div class="choice-title">Postshot <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('PostshotでCSV+PLYを読み込んで3DGSトレーニングしてください。COLMAP変換は不要です。', this)">Copy</button></div>
-          <div class="choice-desc">CSV + PLY をそのまま読み込み。変換不要で最も簡単。大規模データセット（数千枚）でも安定。</div>
-          <div class="choice-tag tag-rec">推奨（大規模）</div>
-        </div>
-        <div class="choice selected" onclick="selectTrainTool('lichtfeld')" id="train-tool-lichtfeld">
-          <div class="choice-title">LichtFeld Studio <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('LichtFeld StudioでCOLMAP形式のデータを読み込んで3DGSトレーニングしてください。CSV+PLY+XMPからCOLMAP変換が必要です。', this)">Copy</button></div>
-          <div class="choice-desc">COLMAP形式に変換が必要。無料・オープンソース。小〜中規模（数百枚）で検証済み。</div>
-          <div class="choice-tag" style="background:rgba(139,92,246,0.15);color:var(--accent2);">無料</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== Postshot パターン ===== -->
-    <div id="train-postshot-section">
-      <div class="card">
-        <h3>Postshot: データの準備</h3>
-        <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
-          RSからエクスポートしたCSVとPLYをそのまま使用します。変換は不要です。
-        </p>
-        <ul class="steps-list">
-          <li>RSからエクスポートした <b>CSV</b>（Registration）と <b>PLY</b>（Point Cloud）を用意</li>
-          <li>画像フォルダ（imagesXMP/またはall_merged/）のパスを確認</li>
-          <li>Postshotで <b>Import</b> → CSV + PLY を選択</li>
-          <li>画像フォルダを指定してトレーニング開始</li>
-        </ul>
-      </div>
-
-      <div class="note note-green">
-        <b>メリット:</b> COLMAP変換が不要。座標変換ミスのリスクなし。大規模データ（6,000枚以上）でも安定動作を確認済み。
-      </div>
-
-      <div class="note note-warn">
-        <b>注意:</b> Postshotはサブスクリプション制。無料版はPLYエクスポートに制限あり。
-      </div>
-
-      <details>
-        <summary>新井口PSプロジェクトの点群参考値</summary>
-        <div class="detail-body">
-          <table class="data-table">
-            <tr><th>ファイル</th><th>頂点数</th><th>サイズ</th></tr>
-            <tr><td>all_up.ply</td><td>約485万</td><td>69 MB</td></tr>
-            <tr><td>all_up_down.ply</td><td>約714万</td><td>102 MB</td></tr>
-          </table>
-          <p style="margin-top:8px; font-size:0.8rem; color:var(--text2);">Postshotでは500〜700万頂点程度の点群で十分な品質が得られています。</p>
+            <button class="copy-btn" onclick="copyCode('cmd-s3-detail')">Copy</button>
+          </div>
         </div>
       </details>
     </div>
 
-    <!-- ===== LichtFeld Studio パターン ===== -->
-    <div id="train-lichtfeld-section">
+    <!-- Route 3: LichtFeld Studio直接 -->
+    <div id="step3-lf-direct" class="route-content" data-routes="3" style="display:none;">
+      <h2><span class="step-badge orange">STEP 3</span> LichtFeld Studio (GUT有効)</h2>
+      <p class="desc">全天球画像を直接LichtFeld Studioに入力し、GUT（Geometric Undistortion Transform）を有効にして処理します。</p>
+      <div class="time-est">&#x23F1; 所要時間: 長い（実験的） &nbsp; <span class="tag tag-manual">実験的</span></div>
 
-    <div class="card">
-      <h3>出力ファイル構成</h3>
-      <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
-        LichtFeld Studio用にフラット構成（<code>sparse/0/</code> は不要）で出力します。
-      </p>
-      <div class="code-wrap">
-        <div class="code-block" id="cmd-s6-struct">colmap/
-├── cameras.txt
-├── images.txt
-├── points3D.ply    ← RS mesh PLY (hardlink)
-└── images/         ← 透視投影画像 (symlink or copy)</div>
-        <button class="copy-btn" onclick="copyCode('cmd-s6-struct')">Copy</button>
+      <div class="card">
+        <h3>手順</h3>
+        <ul class="steps-list">
+          <li>Metashapeからエクスポートしたcamera.xml + PLYを用意</li>
+          <li>全天球画像（images_S/）をLichtFeld Studioに読み込み</li>
+          <li><b>GUT (Geometric Undistortion Transform) を有効</b>にする</li>
+          <li>トレーニングを実行</li>
+        </ul>
+      </div>
+
+      <div class="note note-warn">
+        <b>注意:</b> GUTは処理が非常に重く、時間が大幅に増加します。実験的ルートです。
+      </div>
+
+      <div class="note note-purple">
+        <b>参考:</b> 龍 lilea (lileaLab) がequirectangularを直接LF Studioでテスト中。GUTが重いと報告されています。
+      </div>
+
+      <div class="card">
+        <h3>推奨設定</h3>
+        <table class="data-table">
+          <tr><th>設定項目</th><th>値</th><th>備考</th></tr>
+          <tr><td>GUT</td><td><b>ON（必須）</b></td><td>全天球画像には歪み補正が必要</td></tr>
+          <tr><td>Strategy</td><td><b>IGS+</b></td><td>推奨アルゴリズム</td></tr>
+          <tr><td>Max Gaussians</td><td><b>4,000,000</b></td><td>品質とメモリのバランス</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 4: Route 1 = XMP生成, Route 2 = XML変換 ==================== -->
+  <div class="panel" id="panel-step4">
+
+    <!-- Route 1: XMP生成 -->
+    <div id="step4-xmp" class="route-content" data-routes="1">
+      <h2><span class="step-badge green">STEP 4</span> XMP生成（XML → XMP変換）</h2>
+      <p class="desc">Metashapeのcamera.xmlから各透視投影画像のXMPサイドカーファイルを生成します。</p>
+      <div class="time-est">&#x23F1; 所要時間: 数秒</div>
+
+      <div class="card">
+        <h3>変換内容</h3>
+        <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
+          Metashapeの c2w 行列をトランスポーズして w2c に変換し、RealityCapture用のXMP形式で書き出します。
+        </p>
+        <table class="data-table">
+          <tr><th>項目</th><th>値</th></tr>
+          <tr><td>xcr:Rotation</td><td>c2w → <b>転置して w2c</b>、行優先9値</td></tr>
+          <tr><td>PosePrior</td><td><b>exact</b>（相対位置を維持）</td></tr>
+          <tr><td>CalibrationPrior</td><td><b>exact</b></td></tr>
+          <tr><td>中心点</td><td>8方向すべて同一（オフセットなし）</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>PosePriorの選択肢</h3>
+        <div class="choices">
+          <div class="choice selected" onclick="selectChoice(this)">
+            <div class="choice-title">exact
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP設定をexactで生成。PosePrior=exact, CalibrationPrior=exact。相対位置を維持し、RSが大きく動かさない安定モード。', this)">Copy</button>
+            </div>
+            <div class="choice-desc">相対位置を維持。RSが大きく動かさない。安定。</div>
+            <div class="choice-tag tag-rec">推奨</div>
+          </div>
+          <div class="choice" onclick="selectChoice(this)">
+            <div class="choice-title">initial
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP設定をinitialで生成。PosePrior=initial, CalibrationPrior=initial。RSが特徴点ベースで位置・向きを自由に微調整。スプリット（分離）する場合あり。', this)">Copy</button>
+            </div>
+            <div class="choice-desc">RSが自由に調整可能。スプリットが起きる場合あり。</div>
+            <div class="choice-tag tag-warn">不安定な場合あり</div>
+          </div>
+          <div class="choice" onclick="selectChoice(this)">
+            <div class="choice-title">locked
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP設定をlockedで生成。PosePrior=locked, CalibrationPrior=locked。カメラ位置を完全に固定、RSは一切変更しない。', this)">Copy</button>
+            </div>
+            <div class="choice-desc">完全に固定。RSは位置を一切変更しない。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note note-green">
+        <b>テスト結果:</b> <code>exact</code> モードが最も安定。<code>initial</code> はRSが位置を調整してスプリット（分離）する場合があります。
+      </div>
+
+      <details>
+        <summary>座標変換の技術詳細</summary>
+        <div class="detail-body">
+          <p><b>Metashape → RS の座標変換:</b></p>
+          <ul style="margin:8px 0 8px 20px; font-size:0.82rem; line-height:1.8;">
+            <li><b>Metashape:</b> Z-up, c2w, OpenCVカメラ (X右, Y下, Z前方)</li>
+            <li><b>RS XMP:</b> Y-up, c2w → 転置して w2c を格納</li>
+            <li>回転行列の変換: <code>R_rs = [ R[0], -R[2], R[1] ]</code></li>
+            <li>位置の変換: <code>(x, y, z) → (x, -z, y)</code></li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <!-- Route 2: XML変換（全天球→透視投影） -->
+    <div id="step4-xml-convert" class="route-content" data-routes="2" style="display:none;">
+      <h2><span class="step-badge green">STEP 4</span> XML変換（全天球 → 透視投影）</h2>
+      <p class="desc">全天球用のcamera.xmlを透視投影画像用のピンホールカメラXMLに変換します。</p>
+      <div class="time-est">&#x23F1; 所要時間: 数秒</div>
+
+      <div class="card">
+        <h3>変換内容</h3>
+        <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
+          Metashapeの全天球（Spherical）カメラXMLを、透視投影画像に対応するピンホールカメラのXMLに変換します。
+        </p>
+        <table class="data-table">
+          <tr><th>項目</th><th>入力</th><th>出力</th></tr>
+          <tr><td>カメラモデル</td><td>Spherical</td><td>Pinhole (frame)</td></tr>
+          <tr><td>画像</td><td>全天球 7680x3840</td><td>透視投影 1920x1920</td></tr>
+          <tr><td>FOV</td><td>360度</td><td>90度</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>分割パターン選択</h3>
+        <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
+          STEP 3で選択した分割パターンと同じものを使用してください（パターンA/B/C）。
+        </p>
+        <div class="note">
+          <b>仕組み:</b> 各全天球フレームのc2w行列にyaw回転を適用し、透視投影カメラの位置・向きとしてXMLに書き出します。
+          Metashapeでインポートすると透視投影画像のカメラ位置が復元されます。
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <h3>cameras.txt</h3>
-      <div class="code-wrap">
-        <div class="code-block" id="cmd-s6-cam"># Camera list with one line of data per camera:
+    <!-- Route 3: このステップはルート3では存在しない（ルート3はSTEP3で終了） -->
+    <div id="step4-none" class="route-content" data-routes="3" style="display:none;">
+      <h2><span class="step-badge green">STEP 4</span></h2>
+      <div class="note">
+        <b>ルート3では不要:</b> ルート3（全天球直接）ではSTEP3のLichtFeld Studioで処理が完了するため、このステップは不要です。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 5: Route 1 = RS Align, Route 2 = Metashapeカメラ最適化 ==================== -->
+  <div class="panel" id="panel-step5">
+
+    <!-- Route 1: RS Align + エクスポート -->
+    <div id="step5-rs" class="route-content" data-routes="1">
+      <h2><span class="step-badge purple">STEP 5</span> RS Align + エクスポート</h2>
+      <p class="desc">XMP付き画像をRealityCaptureに読み込み、Align → メッシュ構築 → CSV + PLY エクスポート。</p>
+      <div class="time-est">&#x23F1; Align ~1分/エリア + Mesh ~8分/エリア（24分割時） &nbsp; <span class="tag tag-manual">手動操作</span></div>
+
+      <div class="card">
+        <h3>エリア分割オプション</h3>
+        <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
+          フレーム数が多い場合はエリアに分割してRSで処理。すべての分割パターンで2フレームのオーバーラップを入れる。
+        </p>
+        <table class="data-table">
+          <tr><th>分割数</th><th>1エリアのフレーム数</th><th>RS処理時間/エリア</th><th>PLYサイズ</th><th>備考</th></tr>
+          <tr style="background:rgba(34,197,94,0.05);">
+            <td><b>24分割</b></td><td>~42-46枚</td><td>~10分</td><td>~800MB</td><td style="color:var(--green);">推奨</td>
+          </tr>
+          <tr><td>12分割</td><td>~86-89枚</td><td>~20分</td><td>~1.5GB</td><td>中規模向け</td></tr>
+          <tr><td>2分割</td><td>~500枚</td><td>~60分+</td><td>~6GB</td><td style="color:var(--orange);">ダウンサンプリング必要</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>操作手順</h3>
+        <ul class="steps-list">
+          <li>エリア分割した画像フォルダをRSに読み込み（2フレームオーバーラップ付き）。XMPは自動検出される</li>
+          <li>Align Settings → Use Camera Metadata: <b>Exact</b> に設定</li>
+          <li><b>Align Photos</b> を実行（~1分/エリア）</li>
+          <li>8方向が正しく展開されているか目視確認</li>
+          <li>必要に応じて<b>Mesh</b>を<b>High Detail</b>で構築（~8分/エリア）</li>
+          <li>Registration を <b>CSV</b> でエクスポート</li>
+          <li>Point Cloud / Mesh を <b>PLY</b> でエクスポート</li>
+        </ul>
+      </div>
+
+      <div class="note note-warn">
+        <b>"initial" vs "exact":</b> <code>initial</code> だとRSがカメラ位置を自由に調整するため、画像グループがスプリット（分離）する場合があります。<code>exact</code> は相対位置を維持するため安定です。
+      </div>
+    </div>
+
+    <!-- Route 2: Metashapeカメラ最適化 -->
+    <div id="step5-metashape-opt" class="route-content" data-routes="2" style="display:none;">
+      <h2><span class="step-badge purple">STEP 5</span> Metashapeカメラ最適化</h2>
+      <p class="desc">透視投影画像と変換済みXMLをMetashapeにインポートし、アライメントを最適化します。</p>
+      <div class="time-est">&#x23F1; 所要時間: 画像数による &nbsp; <span class="tag tag-manual">手動操作</span></div>
+
+      <div class="card">
+        <h3>手順</h3>
+        <ul class="steps-list">
+          <li>Metashapeに透視投影画像（images_P/）を読み込み</li>
+          <li>STEP 4で変換したXMLをインポート（File → Import → Import Cameras）</li>
+          <li>アライメント最適化を実行</li>
+          <li>結果を確認し、最適化済みXML + PLYをエクスポート</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>メモリ・スケーラビリティ</h3>
+        <div class="note note-green">
+          <b>大規模対応:</b> 16,000枚程度は128GB RAMなら一発で処理可能です。メモリ不足で落ちた場合はエリア分割してください。
+        </div>
+        <div class="note note-warn">
+          <b>画像間引き:</b> 人や動いている物が写っている画像は間引き予定。動的オブジェクトが3DGS品質を下げるため。
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>出力</h3>
+        <table class="data-table">
+          <tr><th>ファイル</th><th>説明</th></tr>
+          <tr><td>最適化済みXML</td><td>カメラ位置・内部パラメータが最適化されたXML</td></tr>
+          <tr><td>PLY</td><td>点群データ</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Route 3: N/A -->
+    <div id="step5-none" class="route-content" data-routes="3" style="display:none;">
+      <h2><span class="step-badge purple">STEP 5</span></h2>
+      <div class="note">
+        <b>ルート3では不要:</b> ルート3（全天球直接）ではSTEP3で処理が完了するため、このステップは不要です。
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 6: 3DGSトレーニング ==================== -->
+  <div class="panel" id="panel-step6">
+
+    <!-- Route 1: Postshot / LichtFeld -->
+    <div id="step6-route1" class="route-content" data-routes="1">
+      <h2><span class="step-badge orange">STEP 6</span> 3DGSトレーニング</h2>
+      <p class="desc">RSのエクスポートデータで3D Gaussian Splattingモデルを学習します。</p>
+      <div class="time-est">&#x23F1; 所要時間: 数十分（画像数・Max Gaussiansによる）</div>
+
+      <div class="card">
+        <h3>トレーニングツールの選択</h3>
+        <div class="choices">
+          <div class="choice selected" onclick="selectTrainTool('postshot')" id="train-tool-postshot">
+            <div class="choice-title">Postshot（推奨）
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('PostshotでCSV+PLYを読み込んで3DGSトレーニング。COLMAP変換は不要。', this)">Copy</button>
+            </div>
+            <div class="choice-desc">CSV + PLY をそのまま読み込み。変換不要で最も簡単。大規模データセット（数千枚）でも安定。</div>
+            <div class="choice-tag tag-rec">推奨（大規模）</div>
+          </div>
+          <div class="choice" onclick="selectTrainTool('lichtfeld')" id="train-tool-lichtfeld">
+            <div class="choice-title">LichtFeld Studio
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('LichtFeld StudioでCOLMAP形式のデータを読み込んで3DGSトレーニング。CSV+PLY+XMPからCOLMAP変換が必要。', this)">Copy</button>
+            </div>
+            <div class="choice-desc">COLMAP形式に変換が必要。無料・オープンソース。小〜中規模（数百枚）で検証済み。</div>
+            <div class="choice-tag" style="background:rgba(124,92,255,0.15);color:var(--accent2);">無料</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Postshot section -->
+      <div id="train-postshot-section">
+        <div class="card">
+          <h3>Postshot: データの準備</h3>
+          <ul class="steps-list">
+            <li>RSからエクスポートした <b>CSV</b>（Registration）と <b>PLY</b>（Point Cloud）を用意</li>
+            <li>画像フォルダのパスを確認</li>
+            <li>Postshotで <b>Import</b> → CSV + PLY を選択</li>
+            <li>画像フォルダを指定してトレーニング開始</li>
+            <li>完了後、.ply / .splat としてエクスポート</li>
+          </ul>
+        </div>
+        <div class="note note-green">
+          <b>メリット:</b> COLMAP変換が不要。座標変換ミスのリスクなし。大規模データ（6,000枚以上）でも安定動作を確認済み。
+        </div>
+      </div>
+
+      <!-- LichtFeld section -->
+      <div id="train-lichtfeld-section" style="display:none;">
+        <div class="card">
+          <h3>LichtFeld Studio: COLMAP形式への変換</h3>
+          <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
+            LichtFeld Studio用にCOLMAP形式（フラット構成）で出力します。
+          </p>
+          <div class="code-wrap">
+            <div class="code-block" id="cmd-s6-struct">colmap/
+├── cameras.txt
+├── images.txt
+├── points3D.ply    ← RS mesh PLY
+└── images/         ← 透視投影画像</div>
+            <button class="copy-btn" onclick="copyCode('cmd-s6-struct')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>cameras.txt</h3>
+          <div class="code-wrap">
+            <div class="code-block" id="cmd-s6-cam"># Camera list with one line of data per camera:
 #   CAMERA_ID, MODEL, WIDTH, HEIGHT, PARAMS[]
 # PINHOLE: fx, fy, cx, cy
 1 PINHOLE 1920 1920 960.0 960.0 960.0 960.0</div>
-        <button class="copy-btn" onclick="copyCode('cmd-s6-cam')">Copy</button>
-      </div>
-      <div class="note">
-        <b>FOV 90度、1920x1920の場合:</b> f = w/2 = 960.0, cx = cy = 960.0
-      </div>
-    </div>
+            <button class="copy-btn" onclick="copyCode('cmd-s6-cam')">Copy</button>
+          </div>
+          <div class="note">
+            <b>FOV 90度、1920x1920の場合:</b> f = w/2 = 960.0, cx = cy = 960.0
+          </div>
+        </div>
 
-    <div class="card">
-      <h3>images.txt の変換ルール</h3>
-      <table class="data-table">
-        <tr><th>項目</th><th>変換</th></tr>
-        <tr><td>回転</td><td>XMPの値はすでにw2c → <b>そのまま使用（再転置しない）</b></td></tr>
-        <tr><td>平行移動 T</td><td><code>T = -R_w2c @ C</code>（C = CSVのx, y, alt）</td></tr>
-        <tr><td>クォータニオン</td><td><b>wxyz</b>（scalar first）</td></tr>
-        <tr><td>形式</td><td>IMAGE_ID QW QX QY QZ TX TY TZ CAMERA_ID NAME</td></tr>
-      </table>
-    </div>
+        <div class="card">
+          <h3>images.txt の変換ルール</h3>
+          <table class="data-table">
+            <tr><th>項目</th><th>変換</th></tr>
+            <tr><td>回転</td><td>XMPの値はすでにw2c → <b>そのまま使用（再転置しない）</b></td></tr>
+            <tr><td>平行移動 T</td><td><code>T = -R_w2c @ C</code>（C = CSVのx, y, alt）</td></tr>
+            <tr><td>クォータニオン</td><td><b>wxyz</b>（scalar first）</td></tr>
+          </table>
+        </div>
 
-    <div class="note note-red">
-      <b>絶対にやってはいけないこと:</b> 分割後のXMPはすでにw2c（転置済み）です。ここで再度転置するとc2wに戻ってしまい、結果が壊れます。
-    </div>
+        <div class="note note-red">
+          <b>絶対にやってはいけないこと:</b> 分割後のXMPはすでにw2c（転置済み）です。再度転置するとc2wに戻り結果が壊れます。
+        </div>
 
-    <details>
-      <summary>points3D.ply について</summary>
-      <div class="detail-body">
-        <p>RS mesh PLYをそのままhardlinkで <code>points3D.ply</code> として配置します。</p>
-        <ul style="margin:8px 0 8px 20px; font-size:0.82rem; line-height:1.8;">
-          <li>Mesh PLY: float色 + faces → 点群形式（uchar色、facesなし）に変換が必要</li>
-          <li>Align-onlyのsparse点群は使わない（スプラッティングが崩壊する）</li>
-          <li>大きいPLYはダウンサンプリング（STEP 5参照）</li>
-        </ul>
-      </div>
-    </details>
-
-    <details>
-      <summary>COLMAP images.txt の座標系について</summary>
-      <div class="detail-body">
-        <p>COLMAP images.txt の座標系:</p>
-        <ul style="margin:8px 0 8px 20px; font-size:0.82rem; line-height:1.8;">
-          <li><b>w2c</b>（world-to-camera）</li>
-          <li><b>OpenCV座標系:</b> X-right, Y-down, Z-forward</li>
-          <li><b>クォータニオン:</b> wxyz（scalar first）</li>
-        </ul>
-        <p style="margin-top:8px;">各画像は2行で記述されます:</p>
-        <div class="code-wrap">
-          <div class="code-block" id="cmd-s6-fmt"># 1行目: IMAGE_ID QW QX QY QZ TX TY TZ CAMERA_ID IMAGE_NAME
-# 2行目: POINTS2D[] as (X, Y, POINT3D_ID) - 空行でOK
-1 0.9239 0.0 0.3827 0.0 1.234 -0.567 2.345 1 0001_000.jpg
-</div>
-          <button class="copy-btn" onclick="copyCode('cmd-s6-fmt')">Copy</button>
+        <div class="card">
+          <h3>推奨設定</h3>
+          <table class="data-table">
+            <tr><th>設定項目</th><th>推奨値</th><th>備考</th></tr>
+            <tr><td>Strategy</td><td><b>IGS+</b></td><td>推奨アルゴリズム</td></tr>
+            <tr><td>Max Gaussians</td><td><b>4,000,000</b></td><td>品質とメモリのバランス</td></tr>
+            <tr><td>GUT</td><td><b>OFF</b></td><td>PINHOLEモデルでは不要</td></tr>
+          </table>
         </div>
       </div>
-    </details>
-    </div><!-- /train-lichtfeld-section -->
-  </div>
+    </div>
 
-  <!-- ==================== STEP 7: 3DGSトレーニング ==================== -->
-  <div class="panel" id="panel-step7">
-    <h2><span class="step-badge purple">STEP 7</span> 3DGSトレーニング</h2>
-    <p class="desc">選択したツールで3D Gaussian Splattingモデルを学習します。</p>
-    <div class="time-est">&#x23F1; 所要時間: 数十分（画像数・Max Gaussiansによる）</div>
+    <!-- Route 2: Postshot -->
+    <div id="step6-route2" class="route-content" data-routes="2" style="display:none;">
+      <h2><span class="step-badge orange">STEP 6</span> 3DGSトレーニング（Postshot）</h2>
+      <p class="desc">Metashapeで最適化したデータをPostshotで3DGSモデルに変換します。</p>
+      <div class="time-est">&#x23F1; 所要時間: 数十分</div>
 
-    <!-- Postshot トレーニング設定 -->
-    <div class="card" id="step7-postshot-card">
-      <h3>Postshot トレーニング</h3>
-      <ul class="steps-list">
-        <li>Postshotを起動</li>
-        <li><b>Import</b> → CSV + PLY ファイルを選択</li>
-        <li>画像フォルダを指定</li>
-        <li>トレーニング設定を調整して実行</li>
-        <li>完了後、.ply / .splat としてエクスポート</li>
-      </ul>
-      <div class="note note-green" style="margin-top:10px;">
-        <b>検証済み:</b> 6,546枚 + 疎点群（30MB）で綺麗に動作確認済み。COLMAP変換は不要。
+      <div class="card">
+        <h3>Postshotでのトレーニング</h3>
+        <ul class="steps-list">
+          <li>Metashapeからエクスポートした最適化済みXMLとPLYを用意</li>
+          <li>Postshotで <b>Import</b> → XML + PLYを選択</li>
+          <li>画像フォルダ（images_P/）を指定</li>
+          <li>トレーニング設定を調整して実行</li>
+          <li>完了後、.ply / .splat としてエクスポート</li>
+        </ul>
+      </div>
+
+      <div class="note note-green">
+        <b>メリット:</b> Metashapeで最適化済みのカメラパラメータを使用するため、精度が高い。
       </div>
     </div>
 
-    <!-- LichtFeld Studio トレーニング設定 -->
-    <div class="card" id="step7-lichtfeld-card">
-      <h3>LichtFeld Studio トレーニング</h3>
-      <ul class="steps-list">
-        <li>LichtFeld Studioを起動</li>
-        <li><b>Open Folder</b> → <code>colmap/</code> フォルダを選択</li>
-        <li>トレーニング設定を調整（下記参照）</li>
-        <li><b>Start Training</b> を実行</li>
-        <li>完了後、.ply / .splat としてエクスポート</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h3>推奨設定</h3>
-      <table class="data-table">
-        <tr><th>設定項目</th><th>推奨値</th><th>備考</th></tr>
-        <tr><td>Strategy</td><td><b>IGS+</b></td><td>推奨アルゴリズム</td></tr>
-        <tr><td>Max Gaussians</td><td><b>4,000,000</b></td><td>品質とメモリのバランス</td></tr>
-        <tr><td>GUT (Geometric Undistortion)</td><td><b>OFF</b></td><td>PINHOLEモデルでは不要</td></tr>
-      </table>
-    </div>
-
-    <div class="note">
-      <b>インストール先:</b><br>
-      <code>C:\Users\wan-h\Desktop\LichtFeld\LichtFeld-Studio-windows-nightly-2026-03-19-85dc7f7</code>
-    </div>
-
-    <div class="note note-warn">
-      <b>Windows 11 Smart App Control:</b> Smart App Controlが有効だとDLLがブロックされる場合があります。トレーニングが開始しない場合は、設定 → プライバシーとセキュリティ → Smart App Control を確認してください。
-    </div>
-
-    <details>
-      <summary>GUT (Geometric Undistortion Transform) について</summary>
-      <div class="detail-body">
-        <p>GUTはレンズ歪み補正のための機能です。equirectangularを直接LF Studioに入れる場合は必要ですが、今回のワークフローではPINHOLEモデル（v360で分割済み）を使うため<b>不要</b>です。</p>
-        <p style="margin-top:8px;">GUTを有効にすると処理が重くなるだけで、PINHOLEには効果がありません。</p>
+    <!-- Route 3: N/A (already done in step 3) -->
+    <div id="step6-none" class="route-content" data-routes="3" style="display:none;">
+      <h2><span class="step-badge orange">STEP 6</span></h2>
+      <div class="note">
+        <b>ルート3では不要:</b> ルート3（全天球直接）ではSTEP3のLichtFeld Studioで処理が完了するため、このステップは不要です。
       </div>
-    </details>
-
-    <details>
-      <summary>equirectangularを直接使う方法（非推奨）</summary>
-      <div class="detail-body">
-        <p>龍 lilea (lileaLab) がequirectangularを直接LF Studioに入れる方法をテストしていますが、GUTが重く処理時間が大幅に増加します。</p>
-        <p style="margin-top:8px;">本ワークフローのv360分割 → PINHOLE方式の方が効率的です。</p>
-      </div>
-    </details>
+    </div>
   </div>
 
   <!-- ==================== 座標系リファレンス ==================== -->
@@ -1136,15 +1195,151 @@ LichtFeld Studio → 3DGS</div>
 
 <script>
 // ============================================================
+// Route definitions
+// ============================================================
+const ROUTES = {
+  1: {
+    name: 'ルート1: RS経由（検証済み）',
+    steps: ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'],
+    stepLabels: ['フレーム抽出', 'Metashape全天球Align', 'FFmpeg分割', 'XMP生成', 'RS Align+Mesh', 'Postshot/LichtFeld'],
+    tag: '検証済み'
+  },
+  2: {
+    name: 'ルート2: Metashape最適化（新規）',
+    steps: ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'],
+    stepLabels: ['フレーム抽出', 'Metashape全天球Align', 'FFmpeg分割', 'XML変換', 'MSカメラ最適化', 'Postshot'],
+    tag: '新規'
+  },
+  3: {
+    name: 'ルート3: 全天球直接（実験的）',
+    steps: ['step1', 'step2', 'step3'],
+    stepLabels: ['フレーム抽出', 'Metashape全天球Align', 'LichtFeld (GUT)'],
+    tag: '実験的'
+  }
+};
+
+let currentRoute = 1;
+const ALL_STEPS = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'];
+
+// ============================================================
+// Route selection
+// ============================================================
+function selectRoute(routeNum) {
+  currentRoute = routeNum;
+
+  // Update route cards
+  document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('route-card-' + routeNum).classList.add('selected');
+
+  // Update flow overview
+  updateFlowOverview();
+
+  // Update summary
+  updateSummary();
+
+  // Update sidebar nav item visibility
+  updateSidebarSteps();
+
+  // Update step content visibility based on route
+  updateStepContent();
+
+  // Update progress
+  updateProgress();
+
+  saveState();
+}
+
+function updateFlowOverview() {
+  const route = ROUTES[currentRoute];
+  const container = document.getElementById('flow-overview');
+  let html = '';
+  route.steps.forEach((stepId, i) => {
+    const stepNum = ALL_STEPS.indexOf(stepId) + 1;
+    const cb = document.querySelector(`.nav-check[data-step="${stepNum}"]`);
+    const done = cb && cb.checked ? ' done' : '';
+    html += `<div class="flow-node active-route${done}" onclick="showPanel('${stepId}')">`;
+    html += `<div class="fn-num">STEP ${i + 1}</div>`;
+    html += `<div class="fn-label">${route.stepLabels[i]}</div>`;
+    html += `</div>`;
+    if (i < route.steps.length - 1) {
+      html += `<div class="flow-arrow">→</div>`;
+    }
+  });
+  container.innerHTML = html;
+}
+
+function updateSummary() {
+  const container = document.getElementById('overview-summary');
+  const route = ROUTES[currentRoute];
+
+  let rows = '';
+  if (currentRoute === 1) {
+    rows = `
+      <tr><td>1. フレーム抽出</td><td>FFmpeg</td><td>360度動画</td><td>全天球フレーム</td><td>数分</td></tr>
+      <tr><td>2. Metashape Align</td><td>Metashape</td><td>全天球フレーム</td><td>camera.xml + PLY</td><td>5-15分</td></tr>
+      <tr><td>3. FFmpeg分割</td><td>FFmpeg v360</td><td>全天球フレーム</td><td>透視投影画像</td><td>~1秒/画像</td></tr>
+      <tr><td>4. XMP生成</td><td>Python</td><td>camera.xml</td><td>.xmp サイドカー</td><td>数秒</td></tr>
+      <tr><td>5. RS Align+Mesh</td><td>RealityCapture</td><td>画像 + XMP</td><td>CSV + PLY</td><td>~10分/エリア</td></tr>
+      <tr><td>6. 3DGS学習</td><td>Postshot / LF</td><td>CSV + PLY</td><td>.ply / .splat</td><td>数十分</td></tr>`;
+  } else if (currentRoute === 2) {
+    rows = `
+      <tr><td>1. フレーム抽出</td><td>FFmpeg</td><td>360度動画</td><td>全天球フレーム</td><td>数分</td></tr>
+      <tr><td>2. Metashape Align</td><td>Metashape</td><td>全天球フレーム</td><td>camera.xml + PLY</td><td>5-15分</td></tr>
+      <tr><td>3. FFmpeg分割</td><td>FFmpeg v360</td><td>全天球フレーム</td><td>透視投影画像</td><td>~1秒/画像</td></tr>
+      <tr><td>4. XML変換</td><td>Python</td><td>camera.xml</td><td>透視投影XML</td><td>数秒</td></tr>
+      <tr><td>5. MSカメラ最適化</td><td>Metashape</td><td>画像 + XML</td><td>最適化XML + PLY</td><td>画像数による</td></tr>
+      <tr><td>6. 3DGS学習</td><td>Postshot</td><td>XML + PLY</td><td>.ply / .splat</td><td>数十分</td></tr>`;
+  } else {
+    rows = `
+      <tr><td>1. フレーム抽出</td><td>FFmpeg</td><td>360度動画</td><td>全天球フレーム</td><td>数分</td></tr>
+      <tr><td>2. Metashape Align</td><td>Metashape</td><td>全天球フレーム</td><td>camera.xml + PLY</td><td>5-15分</td></tr>
+      <tr><td>3. LichtFeld (GUT)</td><td>LichtFeld Studio</td><td>全天球 + XML</td><td>.ply / .splat</td><td>長時間</td></tr>`;
+  }
+
+  container.innerHTML = `
+    <h3>概要サマリー: ${route.name}</h3>
+    <table class="data-table">
+      <tr><th>ステップ</th><th>ツール</th><th>入力</th><th>出力</th><th>時間目安</th></tr>
+      ${rows}
+    </table>`;
+}
+
+function updateSidebarSteps() {
+  const route = ROUTES[currentRoute];
+  ALL_STEPS.forEach(stepId => {
+    const navItem = document.querySelector(`.nav-item[data-step-id="${stepId}"]`);
+    if (!navItem) return;
+    if (route.steps.includes(stepId)) {
+      navItem.classList.remove('dimmed');
+      navItem.style.pointerEvents = '';
+    } else {
+      navItem.classList.add('dimmed');
+      navItem.style.pointerEvents = 'none';
+    }
+  });
+}
+
+function updateStepContent() {
+  // Show/hide route-specific content within each step panel
+  document.querySelectorAll('.route-content').forEach(el => {
+    const routes = el.getAttribute('data-routes').split(',').map(Number);
+    el.style.display = routes.includes(currentRoute) ? 'block' : 'none';
+  });
+}
+
+// ============================================================
 // Panel switching
 // ============================================================
 function showPanel(id) {
+  // Check if this step is available in current route
+  const route = ROUTES[currentRoute];
+  if (id.startsWith('step') && !route.steps.includes(id)) return;
+
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
   const item = document.querySelector(`.nav-item[data-panel="${id}"]`);
   if (item) item.classList.add('active');
-  // Scroll main to top
   document.querySelector('.main').scrollTop = 0;
   saveState();
 }
@@ -1163,6 +1358,15 @@ function copyCode(id) {
   });
 }
 
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
 // ============================================================
 // Choice selector (visual only)
 // ============================================================
@@ -1176,30 +1380,27 @@ function selectChoice(el) {
 // Progress tracking
 // ============================================================
 function updateProgress() {
-  const checks = document.querySelectorAll('.nav-check');
+  const route = ROUTES[currentRoute];
   let done = 0;
-  checks.forEach(cb => {
-    if (cb.checked) done++;
-    // Update nav item style
-    const navItem = cb.closest('.nav-item');
-    if (cb.checked) {
-      navItem.classList.add('completed');
-    } else {
-      navItem.classList.remove('completed');
+  let total = route.steps.length;
+
+  route.steps.forEach(stepId => {
+    const stepNum = ALL_STEPS.indexOf(stepId) + 1;
+    const cb = document.querySelector(`.nav-check[data-step="${stepNum}"]`);
+    if (cb && cb.checked) done++;
+    const navItem = cb ? cb.closest('.nav-item') : null;
+    if (navItem) {
+      if (cb && cb.checked) navItem.classList.add('completed');
+      else navItem.classList.remove('completed');
     }
   });
-  const total = checks.length;
-  const pct = Math.round((done / total) * 100);
+
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   document.getElementById('progress-bar').style.width = pct + '%';
-  document.getElementById('progress-text').textContent = `${done} / ${total} ステップ完了`;
-  // Also update flow overview nodes
-  const flowNodes = document.querySelectorAll('.flow-node');
-  checks.forEach((cb, i) => {
-    if (flowNodes[i]) {
-      if (cb.checked) flowNodes[i].classList.add('done');
-      else flowNodes[i].classList.remove('done');
-    }
-  });
+  document.getElementById('progress-text').textContent = `${done} / ${total} ステップ完了（${ROUTES[currentRoute].name.split(':')[0]}）`;
+
+  // Update flow overview nodes
+  updateFlowOverview();
   saveState();
 }
 
@@ -1213,7 +1414,6 @@ function genStep1Cmd() {
   const output = v('s1-output') || '<images_S>';
   const step = v('s1-step') || '1';
   const uiQuality = parseInt(v('s1-quality')) || 10;
-  // UI: 1(低)〜10(最高) → FFmpeg -q:v: 31(低)〜1(最高)
   const ffmpegQ = Math.round(1 + (10 - uiQuality) * 30 / 9);
   let cmd = '';
   if (step === '1') {
@@ -1231,31 +1431,39 @@ function genStep1Cmd() {
 // ============================================================
 const SPLIT_PATTERNS = {
   A: {
-    name: 'パターンA: 水平8方向',
+    name: 'パターンA: 8h = 8枚/frame',
     count: 8,
     directions: [
-      { yaw: 0, pitch: 0 }, { yaw: 45, pitch: 0 }, { yaw: 90, pitch: 0 }, { yaw: 135, pitch: 0 },
-      { yaw: 180, pitch: 0 }, { yaw: 225, pitch: 0 }, { yaw: 270, pitch: 0 }, { yaw: 315, pitch: 0 },
+      { yaw: 0, pitch: 0, type: 'h' }, { yaw: 45, pitch: 0, type: 'h' },
+      { yaw: 90, pitch: 0, type: 'h' }, { yaw: 135, pitch: 0, type: 'h' },
+      { yaw: 180, pitch: 0, type: 'h' }, { yaw: 225, pitch: 0, type: 'h' },
+      { yaw: 270, pitch: 0, type: 'h' }, { yaw: 315, pitch: 0, type: 'h' },
     ]
   },
   B: {
-    name: 'パターンB: 水平8方向 + 上下斜め4方向',
+    name: 'パターンB: 8h+2d+2u = 12枚/frame',
     count: 12,
     directions: [
-      { yaw: 0, pitch: 0 }, { yaw: 45, pitch: 0 }, { yaw: 90, pitch: 0 }, { yaw: 135, pitch: 0 },
-      { yaw: 180, pitch: 0 }, { yaw: 225, pitch: 0 }, { yaw: 270, pitch: 0 }, { yaw: 315, pitch: 0 },
-      { yaw: 0, pitch: -30, label: '前方見下げ' }, { yaw: 180, pitch: -30, label: '後方見下げ' },
-      { yaw: 90, pitch: 30, label: '右見上げ' }, { yaw: 270, pitch: 30, label: '左見上げ' },
+      { yaw: 0, pitch: 0, type: 'h' }, { yaw: 45, pitch: 0, type: 'h' },
+      { yaw: 90, pitch: 0, type: 'h' }, { yaw: 135, pitch: 0, type: 'h' },
+      { yaw: 180, pitch: 0, type: 'h' }, { yaw: 225, pitch: 0, type: 'h' },
+      { yaw: 270, pitch: 0, type: 'h' }, { yaw: 315, pitch: 0, type: 'h' },
+      { yaw: 0, pitch: -30, type: 'd' }, { yaw: 180, pitch: -30, type: 'd' },
+      { yaw: 90, pitch: 30, type: 'u' }, { yaw: 270, pitch: 30, type: 'u' },
     ]
   },
   C: {
-    name: 'パターンC: 水平8方向 + 上下各4方向',
+    name: 'パターンC: 8h+4u+4d = 16枚/frame',
     count: 16,
     directions: [
-      { yaw: 0, pitch: 0 }, { yaw: 45, pitch: 0 }, { yaw: 90, pitch: 0 }, { yaw: 135, pitch: 0 },
-      { yaw: 180, pitch: 0 }, { yaw: 225, pitch: 0 }, { yaw: 270, pitch: 0 }, { yaw: 315, pitch: 0 },
-      { yaw: 0, pitch: 30 }, { yaw: 90, pitch: 30 }, { yaw: 180, pitch: 30 }, { yaw: 270, pitch: 30 },
-      { yaw: 0, pitch: -30 }, { yaw: 90, pitch: -30 }, { yaw: 180, pitch: -30 }, { yaw: 270, pitch: -30 },
+      { yaw: 0, pitch: 0, type: 'h' }, { yaw: 45, pitch: 0, type: 'h' },
+      { yaw: 90, pitch: 0, type: 'h' }, { yaw: 135, pitch: 0, type: 'h' },
+      { yaw: 180, pitch: 0, type: 'h' }, { yaw: 225, pitch: 0, type: 'h' },
+      { yaw: 270, pitch: 0, type: 'h' }, { yaw: 315, pitch: 0, type: 'h' },
+      { yaw: 0, pitch: 30, type: 'u' }, { yaw: 90, pitch: 30, type: 'u' },
+      { yaw: 180, pitch: 30, type: 'u' }, { yaw: 270, pitch: 30, type: 'u' },
+      { yaw: 0, pitch: -30, type: 'd' }, { yaw: 90, pitch: -30, type: 'd' },
+      { yaw: 180, pitch: -30, type: 'd' }, { yaw: 270, pitch: -30, type: 'd' },
     ]
   }
 };
@@ -1263,19 +1471,19 @@ let currentSplitPattern = 'A';
 
 function selectSplitPattern(key) {
   currentSplitPattern = key;
-  document.querySelectorAll('#panel-step3 .choice').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#step3-ffmpeg .choice').forEach(c => c.classList.remove('selected'));
   document.getElementById('split-pattern-' + key).classList.add('selected');
 
   const p = SPLIT_PATTERNS[key];
-  document.getElementById('s3-pattern-display').value = p.name.replace('パターンA: ', '').replace('パターンB: ', '') + ' (' + p.count + '枚/フレーム)';
+  document.getElementById('s3-pattern-display').value = p.name;
 
-  // Update directions detail
   const detail = document.getElementById('split-directions-detail');
   let html = '<div style="font-size:0.8rem; color:var(--text2);">';
   html += '<b>方向一覧:</b> ';
-  p.directions.forEach((d, i) => {
-    const pitchStr = d.pitch !== 0 ? ` P${d.pitch > 0 ? '+' : ''}${d.pitch}°` : '';
-    html += `<span style="display:inline-block; background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:1px 6px; margin:2px; font-family:monospace; font-size:0.75rem;">Y${d.yaw}°${pitchStr}</span>`;
+  p.directions.forEach(d => {
+    const prefix = d.type;
+    const pitchStr = d.pitch !== 0 ? ` P${d.pitch > 0 ? '+' : ''}${d.pitch}` : '';
+    html += `<span style="display:inline-block; background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:1px 6px; margin:2px; font-family:monospace; font-size:0.75rem;">${prefix}Y${d.yaw}${pitchStr}</span>`;
   });
   html += '</div>';
   detail.innerHTML = html;
@@ -1288,7 +1496,7 @@ function calcSplitTotal() {
   const frames = parseInt(document.getElementById('s3-frame-count').value) || 0;
   const p = SPLIT_PATTERNS[currentSplitPattern];
   const total = frames * p.count;
-  const sizeEstMB = Math.round(total * 0.35); // ~350KB per 1920x1920 JPG
+  const sizeEstMB = Math.round(total * 0.35);
 
   const result = document.getElementById('split-calc-result');
   result.innerHTML = `
@@ -1310,7 +1518,7 @@ function calcSplitTotal() {
       推定ディスク容量: 約 ${sizeEstMB > 1000 ? (sizeEstMB/1000).toFixed(1) + ' GB' : sizeEstMB + ' MB'}
       （1枚あたり約350KB想定）<br>
       推定処理時間: 約 ${total < 60 ? total + '秒' : Math.round(total/60) + '分' + (Math.round(total/60) >= 60 ? '（' + (total/3600).toFixed(1) + '時間）' : '')}
-      （1枚あたり約1秒想定）
+      （~1秒/画像）
     </div>
   `;
 }
@@ -1322,8 +1530,7 @@ function genStep3Cmd() {
   let cmd = `# ${p.name} — 全天球1枚に対する分割コマンド例 (0001.jpg):\n\n`;
   p.directions.forEach(d => {
     const yawStr = String(d.yaw).padStart(3, '0');
-    const pitchStr = d.pitch !== 0 ? `p${d.pitch > 0 ? '+' : ''}${d.pitch}` : '';
-    const suffix = pitchStr ? `${yawStr}_${pitchStr}` : yawStr;
+    const suffix = `${d.type}${yawStr}`;
     cmd += `ffmpeg -i "${inDir}\\0001.jpg" -vf "v360=equirect:flat:h_fov=90:v_fov=90:yaw=${d.yaw}:pitch=${d.pitch}:roll=0,scale=1920:1920" -frames:v 1 -q:v 2 "${outDir}\\0001_${suffix}.jpg"\n`;
   });
   cmd += `\n# ${p.count}方向 x 全フレーム = バッチ処理で回す`;
@@ -1331,15 +1538,26 @@ function genStep3Cmd() {
 }
 
 // ============================================================
-// Copy text helper (for inline copy buttons)
+// Step 6: Training tool selection (Route 1)
 // ============================================================
-function copyText(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
-  });
+let currentTrainTool = 'postshot';
+
+function selectTrainTool(tool) {
+  currentTrainTool = tool;
+  document.querySelectorAll('#step6-route1 .choices .choice').forEach(c => c.classList.remove('selected'));
+  document.getElementById('train-tool-' + tool).classList.add('selected');
+
+  const psSection = document.getElementById('train-postshot-section');
+  const lfSection = document.getElementById('train-lichtfeld-section');
+
+  if (tool === 'postshot') {
+    if (psSection) psSection.style.display = 'block';
+    if (lfSection) lfSection.style.display = 'none';
+  } else {
+    if (psSection) psSection.style.display = 'none';
+    if (lfSection) lfSection.style.display = 'block';
+  }
+  saveState();
 }
 
 // ============================================================
@@ -1347,151 +1565,199 @@ function copyText(text, btn) {
 // ============================================================
 function copyWorkflow(type) {
   let text = '';
+  const rName = ROUTES[currentRoute].name;
 
-  if (type === 'short') {
-    text = `【3DGSワークフロー（簡易版）】
+  if (currentRoute === 1) {
+    if (type === 'short') {
+      text = `【3DGSワークフロー ルート1: RS経由（簡易版）】
 
-1. 360°動画 → FFmpegでフレーム抽出（equirectangular 7680x3840）
-2. Metashape → 全天球Sphericalアライメント → camera.xml出力
-3. FFmpeg v360 → 8方向perspective分割（1920x1920, FOV90°）
+1. 360度動画 → FFmpegでフレーム抽出（equirectangular 7680x3840）
+2. Metashape → 全天球Sphericalアライメント → camera.xml + PLY出力
+3. FFmpeg v360 → 透視投影分割（1920x1920, FOV90度）
 4. camera.xmlからXMP生成（c2w→転置w2c, exact prior）
-5. エリア分割（2フレームオーバーラップ）→ RSでAlign + メッシュ構築 → CSV + PLYエクスポート
-6. Postshotで CSV + PLY を読み込み → 3DGSトレーニング
-
-※ Metashapeはカメラ位置推定のみに使用（3DGSデータはperspective分割画像）`;
-
-  } else if (type === 'full') {
-    text = `【3DGSワークフロー（全体フロー）】
+5. エリア分割（2フレームオーバーラップ）→ RSでAlign + Mesh → CSV + PLYエクスポート
+6. Postshot/LichtFeldで3DGSトレーニング`;
+    } else if (type === 'full') {
+      text = `【3DGSワークフロー ルート1: RS経由（全体フロー）】
 
 ■ 概要
-360°動画から3D Gaussian Splatting（3DGS）を生成するパイプライン。
-Metashapeで位置推定 → FFmpegで分割 → RSでアライメント+メッシュ → Postshotで3DGS化。
+360度動画から3D Gaussian Splatting（3DGS）を生成するパイプライン。
+Metashapeで位置推定 → FFmpegで分割 → RSでAlign+Mesh → Postshot/LichtFeldで3DGS化。
 
 ■ STEP 1: フレーム抽出（FFmpeg）
-- 入力: 360°動画（.mp4/.mov）
-- 出力: equirectangularフレーム連番（7680x3840）→ images_S/
-- 所要時間: 数分
+- 入力: 360度動画 → 出力: equirectangularフレーム連番（7680x3840）
 
 ■ STEP 2: Metashape Sphericalアライメント（手動）
-- 全天球画像をMetashapeに読み込み → カメラタイプ「Spherical」
-- Align Photos → camera.xmlエクスポート
-- ※位置推定のみに使用
-- 所要時間: 5-15分
+- 精度=高, 座標事前選択=推定値, キーポイント40000, タイポイント4000
+- 出力: camera.xml + PLY
 
 ■ STEP 3: FFmpeg v360 透視投影分割
-- equirectangular → 8方向perspective（1920x1920, FOV90°, 45°間隔）
-- オプション: +上下斜め4方向（合計12方向、P28参考）
-- 出力: {フレーム番号}_{角度}.jpg → images_P/
-- 所要時間: 数分〜数十分
+- パターンA(8枚) / B(12枚) / C(16枚) per frame
+- 命名: {frame}_{h/u/d}{angle}.jpg, 1920x1920 FOV90度
 
-■ STEP 4: XMP生成（Python）
-- camera.xmlの回転行列を転置（c2w → w2c）
-- PosePrior="exact", CalibrationPrior="exact"
-- 全方向同一中心点（オフセットなし）
-- 所要時間: 数秒
+■ STEP 4: XMP生成
+- c2w→転置w2c, PosePrior=exact推奨
 
-■ STEP 5: RealityScan アライメント + メッシュ構築
-- 画像+XMPをRSに読み込み → Align（~1分/エリア）
-- メッシュ構築 High Detail（~8分/エリア）
-- CSV（Registration）+ PLY（メッシュ点群）エクスポート
-- エリア分割: 24分割推奨（2フレームオーバーラップ）
+■ STEP 5: RS Align + Mesh
+- エリア分割（24/12/2分割, 2フレームオーバーラップ）
+- CSV + PLYエクスポート
 
-■ STEP 6-7: 3DGSトレーニング
-【Postshot（推奨）】
-- CSV + PLYをそのまま読み込み。変換不要。
-- 大規模（6,000枚以上）でも安定動作確認済み。
-
-【LichtFeld Studio（無料・小規模向き）】
-- COLMAP形式に変換が必要（CSV+PLY+XMP → cameras.txt/images.txt/points3D.ply）
-- 小〜中規模（数百枚）で動作確認済み。大規模は点群読み込みに課題あり。
-
-■ 重要な注意事項
-- XMPのRotationは転置済み（w2c）→ COLMAP変換時に再転置しないこと
-- Metashapeは位置推定のみ。全天球のまま3DGSに入れる予定はない
-- メッシュPLYが必要（疎な点群だとスプラット巨大化）
-- PLYサイズ上限（LichtFeld）: ~4000-5000万頂点、600-700MB
-- exactだとRSアライメント安定。initialだと分裂する場合あり`;
-
-  } else if (type === 'technical') {
-    text = `【3DGSワークフロー（技術詳細付き）】
+■ STEP 6: 3DGSトレーニング
+- Postshot: CSV+PLY直接読み込み（推奨）
+- LichtFeld: COLMAP変換必要`;
+    } else {
+      text = `【3DGSワークフロー ルート1: RS経由（技術詳細付き）】
 
 ■ パイプライン
-360°動画 → フレーム抽出 → Metashape(Spherical) → FFmpeg(v360) → XMP生成 → RS(Align+Mesh) → Postshot/LichtFeld
+360度動画 → FFmpegフレーム抽出 → Metashape(Spherical) → FFmpeg(v360) → XMP生成 → RS(Align+Mesh) → Postshot/LichtFeld
 
 ■ 座標系変換
 - Metashape XML: c2w, Z-up, row-major 4x4
-- XMP xcr:Rotation: 元はc2w（R^-1）を格納 → 転置してw2c化
+- XMP xcr:Rotation: c2w → 転置してw2c化
 - COLMAP images.txt: w2c, OpenCV(X右Y下Z前), quaternion wxyz
-- transforms.json: c2w, OpenGL(X右Y上Z後), 4x4行列
 - 位置変換: Metashape(x,y,z) → RS XMP(x,-z,y)
 - COLMAP Translation: T = -R_w2c @ C
 
+■ Metashape設定
+- 精度=高, 座標事前選択=推定値(連番端ズレ対策), KP=40000, TP=4000
+
 ■ XMP設定
 - xcr:Rotation: 転置済みw2c, row-major 9値
-- xcr:Position: カメラ中心ワールド座標（全方向同一）
-- xcr:PosePrior: "exact"（推奨）/ "initial"（RS微調整可、分裂リスク）/ "locked"（完全固定）
-- xcr:CalibrationPrior: PosePriorと同じ値
-- xcr:FocalLength35mm: 18.0（FOV90°, 1920x1920の場合）
-- xcr:DistortionModel: "brown3"
-- xcr:DistortionCoeficients: "0 0 0 0 0 0"
+- xcr:PosePrior: "exact"推奨 / "initial" / "locked"
+- xcr:FocalLength35mm: 18.0（FOV90度, 1920x1920）`;
+    }
+  } else if (currentRoute === 2) {
+    if (type === 'short') {
+      text = `【3DGSワークフロー ルート2: Metashape最適化（簡易版）】
 
-■ COLMAP形式（LichtFeld Studio用）
-cameras.txt: 1 PINHOLE 1920 1920 960.0 960.0 960.0 960.0
-images.txt: IMAGE_ID QW QX QY QZ TX TY TZ CAMERA_ID NAME（2行ずつ、POINTS2D空行）
-points3D.ply: メッシュPLY（face除去+uchar色変換+間引きが必要な場合あり）
+1. 360度動画 → FFmpegでフレーム抽出
+2. Metashape → 全天球Sphericalアライメント → camera.xml + PLY
+3. FFmpeg v360 → 透視投影分割
+4. XML変換（全天球→透視投影ピンホールカメラ）
+5. Metashapeでカメラ最適化
+6. Postshotで3DGSトレーニング`;
+    } else if (type === 'full') {
+      text = `【3DGSワークフロー ルート2: Metashape最適化（全体フロー）】
 
-■ PLYサイズ目安
-- 24分割(~700枚): ~800MB → そのまま使用可
-- 半分(~4000枚): ~6GB → 1/3間引き(625MB)で成功
-- 上限: ~4000-5000万頂点, 600-700MB
+■ 概要
+RSを使わずMetashapeでカメラ最適化まで行うルート。
 
-■ LichtFeld Studio大規模設定（未検証）
---resize_factor 4, Max Gaussians 60万, SH Degree 2, Tile Mode 4
-CPU Cache ON, FS Cache ON, headlessモード
+■ STEP 1-3: ルート1と同じ
+■ STEP 4: XML変換 — 全天球XMLを透視投影ピンホールカメラXMLに変換
+■ STEP 5: Metashapeカメラ最適化
+- 128GB RAMなら16000枚一発処理可能
+- 人・動的オブジェクト画像は間引き予定
+■ STEP 6: Postshotで3DGSトレーニング`;
+    } else {
+      text = `【3DGSワークフロー ルート2: Metashape最適化（技術詳細）】
 
-■ 参考
-- lileaLab スライド: https://www.docswell.com/s/lileaLab/Z44DV6-260214
-- lileaLab 設定ガイド: https://lilea.net/lab/how-to-use-lichtfeld-studio/
-- GitHub: https://github.com/aratani-png/3DGSflow`;
+■ パイプライン
+360度動画 → FFmpeg → Metashape(Spherical) → FFmpeg(v360) → XML変換 → Metashape最適化 → Postshot
+
+■ XML変換: Spherical camera.xml → Pinhole camera XML
+- 各フレームのc2w行列にyaw回転適用
+- ピンホールカメラパラメータ生成
+
+■ Metashapeカメラ最適化
+- 16000枚: 128GB RAMで一発処理可能
+- メモリ不足時はエリア分割`;
+    }
+  } else {
+    if (type === 'short') {
+      text = `【3DGSワークフロー ルート3: 全天球直接（簡易版）】
+
+1. 360度動画 → FFmpegでフレーム抽出
+2. Metashape → 全天球Sphericalアライメント
+3. LichtFeld Studio (GUT有効) で直接3DGSトレーニング
+
+※ 実験的ルート。GUTが重い。`;
+    } else {
+      text = `【3DGSワークフロー ルート3: 全天球直接】
+
+■ 概要
+全天球画像を直接LichtFeld Studioに入力する最短ルート。ただしGUTが重く実験的。
+
+■ STEP 1: フレーム抽出（FFmpeg）
+■ STEP 2: Metashape全天球Sphericalアライメント
+■ STEP 3: LichtFeld Studio
+- GUT (Geometric Undistortion Transform) を有効にする（必須）
+- Strategy: IGS+, Max Gaussians: 4,000,000
+- 参考: 龍 lilea (lileaLab) がテスト中`;
+    }
   }
 
   document.getElementById('cmd-workflow').textContent = text;
 }
 
 // ============================================================
-// Step 6-7: Training tool selection
+// Persistence
 // ============================================================
-let currentTrainTool = 'postshot';
+function saveState() {
+  const s = {};
+  s._route = currentRoute;
+  s._splitPattern = currentSplitPattern;
+  s._trainTool = currentTrainTool;
 
-function selectTrainTool(tool) {
-  currentTrainTool = tool;
-  document.querySelectorAll('#panel-step6 > .card:first-of-type .choice').forEach(c => c.classList.remove('selected'));
-  document.getElementById('train-tool-' + tool).classList.add('selected');
+  const activePanel = document.querySelector('.panel.active');
+  if (activePanel) s._panel = activePanel.id.replace('panel-', '');
 
-  const psSection = document.getElementById('train-postshot-section');
-  const lfSection = document.getElementById('train-lichtfeld-section');
-  const psCard7 = document.getElementById('step7-postshot-card');
-  const lfCard7 = document.getElementById('step7-lichtfeld-card');
+  document.querySelectorAll('input[type="text"], input[type="number"], select').forEach(el => {
+    if (el.id) s[el.id] = el.value;
+  });
 
-  if (tool === 'postshot') {
-    if (psSection) psSection.style.display = 'block';
-    if (lfSection) lfSection.style.display = 'none';
-    if (psCard7) psCard7.style.display = 'block';
-    if (lfCard7) lfCard7.style.display = 'none';
-  } else {
-    if (psSection) psSection.style.display = 'none';
-    if (lfSection) lfSection.style.display = 'block';
-    if (psCard7) psCard7.style.display = 'none';
-    if (lfCard7) lfCard7.style.display = 'block';
-  }
-  saveState();
+  const checks = {};
+  document.querySelectorAll('.nav-check').forEach(cb => {
+    const step = cb.getAttribute('data-step');
+    if (step) checks[step] = cb.checked;
+  });
+  s._checks = checks;
+  localStorage.setItem('3dgs_wf3', JSON.stringify(s));
 }
 
-// Initialize on load
-document.addEventListener('DOMContentLoaded', () => {
-  selectSplitPattern(currentSplitPattern);
-  selectTrainTool(currentTrainTool);
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('3dgs_wf3') || '{}');
 
+    // Restore inputs
+    document.querySelectorAll('input[type="text"], input[type="number"], select').forEach(el => {
+      if (el.id && s[el.id] !== undefined) el.value = s[el.id];
+    });
+
+    // Restore checkboxes
+    if (s._checks) {
+      document.querySelectorAll('.nav-check').forEach(cb => {
+        const step = cb.getAttribute('data-step');
+        if (step && s._checks[step]) cb.checked = true;
+      });
+    }
+
+    // Restore route
+    if (s._route) selectRoute(s._route);
+    else selectRoute(1);
+
+    // Restore split pattern
+    if (s._splitPattern) selectSplitPattern(s._splitPattern);
+    else selectSplitPattern('A');
+
+    // Restore training tool
+    if (s._trainTool) selectTrainTool(s._trainTool);
+    else selectTrainTool('postshot');
+
+    // Restore panel
+    if (s._panel) showPanel(s._panel);
+
+    updateProgress();
+  } catch(e) {
+    selectRoute(1);
+    selectSplitPattern('A');
+    selectTrainTool('postshot');
+  }
+}
+
+// ============================================================
+// Initialize
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
   // Drag & drop for file path inputs
   function setupFileDrop(inputId) {
     const input = document.getElementById(inputId);
@@ -1514,7 +1780,6 @@ document.addEventListener('DOMContentLoaded', () => {
       container.style.outline = 'none';
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         const file = e.dataTransfer.files[0];
-        // Use webkitRelativePath or name with path
         const path = file.path || file.name;
         input.value = path;
         input.dispatchEvent(new Event('input'));
@@ -1523,59 +1788,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Setup drag & drop on all file path inputs
   ['s1-video', 's1-output', 's3-input', 's3-output'].forEach(setupFileDrop);
+
+  loadState();
 });
-
-// ============================================================
-// Persistence
-// ============================================================
-function saveState() {
-  const s = {};
-  // Active panel
-  const activePanel = document.querySelector('.panel.active');
-  if (activePanel) s._panel = activePanel.id.replace('panel-', '');
-  // All inputs
-  document.querySelectorAll('input[type="text"], input[type="number"], select').forEach(el => {
-    if (el.id) s[el.id] = el.value;
-  });
-  // Checkboxes (progress)
-  const checks = {};
-  document.querySelectorAll('.nav-check').forEach(cb => {
-    const step = cb.getAttribute('data-step');
-    if (step) checks[step] = cb.checked;
-  });
-  s._checks = checks;
-  localStorage.setItem('3dgs_wf2', JSON.stringify(s));
-}
-
-function loadState() {
-  try {
-    const s = JSON.parse(localStorage.getItem('3dgs_wf2') || '{}');
-    // Restore inputs
-    document.querySelectorAll('input[type="text"], input[type="number"], select').forEach(el => {
-      if (el.id && s[el.id] !== undefined) el.value = s[el.id];
-    });
-    // Restore checkboxes
-    if (s._checks) {
-      document.querySelectorAll('.nav-check').forEach(cb => {
-        const step = cb.getAttribute('data-step');
-        if (step && s._checks[step]) cb.checked = true;
-      });
-    }
-    // Restore panel
-    if (s._panel) showPanel(s._panel);
-    updateProgress();
-  } catch(e) {}
-}
 
 // Auto-save on input changes
 document.querySelectorAll('input, select').forEach(el => {
   el.addEventListener('change', saveState);
   el.addEventListener('input', saveState);
 });
-
-loadState();
 </script>
 </body>
 </html>
