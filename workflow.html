@@ -1308,7 +1308,9 @@ function calcSplitTotal() {
     </div>
     <div style="margin-top:10px; font-size:0.78rem; color:var(--text2); text-align:center;">
       推定ディスク容量: 約 ${sizeEstMB > 1000 ? (sizeEstMB/1000).toFixed(1) + ' GB' : sizeEstMB + ' MB'}
-      （1枚あたり約350KB想定）
+      （1枚あたり約350KB想定）<br>
+      推定処理時間: 約 ${total < 60 ? total + '秒' : Math.round(total/60) + '分' + (Math.round(total/60) >= 60 ? '（' + (total/3600).toFixed(1) + '時間）' : '')}
+      （1枚あたり約1秒想定）
     </div>
   `;
 }
