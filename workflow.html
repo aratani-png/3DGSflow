@@ -575,19 +575,30 @@
       <h3>分割パターンの選択</h3>
       <div class="choices">
         <div class="choice selected" onclick="selectSplitPattern('A')" id="split-pattern-A">
-          <div class="choice-title">パターンA: 水平8方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向に分割してください。45度間隔（0,45,90,135,180,225,270,315度）、FOV90度、1920x1920px。', this)">Copy</button></div>
-          <div class="choice-desc">水平方向のみ45度間隔で8枚。シンプルで処理が軽い。</div>
+          <div class="choice-title">パターンA: 計8枚/フレーム <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向に分割してください。45度間隔（0,45,90,135,180,225,270,315度）、pitch=0、FOV90度、1920x1920px。', this)">Copy</button></div>
+          <div class="choice-desc">
+            <b>水平8枚</b>（45度間隔、pitch=0°）<br>
+            上下なし
+          </div>
           <div class="choice-tag tag-rec">基本</div>
         </div>
         <div class="choice" onclick="selectSplitPattern('B')" id="split-pattern-B">
-          <div class="choice-title">パターンB: 8方向+上下斜め4方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向+上下斜め4方向の計12方向に分割してください。水平は45度間隔、前後pitch-30度、左右pitch+30度。FOV90度、1920x1920px。', this)">Copy</button></div>
-          <div class="choice-desc">水平8枚 + 前後30度見下げ + 左右30度見上げ。オーバーラップが増え、RSアライメント品質が向上。</div>
+          <div class="choice-title">パターンB: 計12枚/フレーム <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで計12方向に分割してください。水平8枚(45度間隔,pitch=0)、下2枚(前後yaw=0,180,pitch=-30)、上2枚(左右yaw=90,270,pitch=+30)。FOV90度、1920x1920px。', this)">Copy</button></div>
+          <div class="choice-desc">
+            <b>水平8枚</b>（45度間隔、pitch=0°）<br>
+            <b>下2枚</b>（前後 yaw=0°,180° / pitch=-30°）<br>
+            <b>上2枚</b>（左右 yaw=90°,270° / pitch=+30°）
+          </div>
           <div class="choice-tag" style="background:rgba(139,92,246,0.15);color:var(--accent2);">高品質</div>
         </div>
         <div class="choice" onclick="selectSplitPattern('C')" id="split-pattern-C">
-          <div class="choice-title">パターンC: 8方向+上下各4方向 <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで水平8方向+上方向4方向(pitch+30度,90度間隔)+下方向4方向(pitch-30度,90度間隔)の計16方向に分割してください。FOV90度、1920x1920px。', this)">Copy</button></div>
-          <div class="choice-desc">水平8枚 + 上30度4枚 + 下30度4枚 = 計16枚/フレーム。バランスの良い高品質構成。</div>
-          <div class="choice-tag" style="background:rgba(245,158,11,0.15);color:var(--orange);">高品質</div>
+          <div class="choice-title">パターンC: 計16枚/フレーム <button class="copy-btn" style="position:relative;top:0;right:0;margin-left:8px;" onclick="event.stopPropagation();copyText('FFmpegで計16方向に分割してください。水平8枚(45度間隔,pitch=0)、上4枚(yaw=0,90,180,270,pitch=+30)、下4枚(yaw=0,90,180,270,pitch=-30)。FOV90度、1920x1920px。', this)">Copy</button></div>
+          <div class="choice-desc">
+            <b>水平8枚</b>（45度間隔、pitch=0°）<br>
+            <b>上4枚</b>（yaw=0°,90°,180°,270° / pitch=+30°）<br>
+            <b>下4枚</b>（yaw=0°,90°,180°,270° / pitch=-30°）
+          </div>
+          <div class="choice-tag" style="background:rgba(245,158,11,0.15);color:var(--orange);">最高品質</div>
         </div>
       </div>
       <div class="note note-green" style="margin-top:10px;">
