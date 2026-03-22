@@ -377,6 +377,24 @@
   .copy-btn-inline:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
   .copy-btn-inline.copied { background: var(--green); color: #000; border-color: var(--green); }
 
+  /* Substeps */
+  .substep {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px; margin: 8px 0;
+    background: var(--surface); border-radius: 8px;
+    border-left: 3px solid var(--accent);
+  }
+  .substep-num {
+    background: var(--accent); color: white;
+    border-radius: 6px; padding: 2px 8px;
+    font-size: 0.75rem; font-weight: 700;
+    white-space: nowrap; flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .substep-content { flex: 1; }
+  .substep-title { font-weight: 600; margin-bottom: 4px; }
+  .substep-desc { font-size: 0.82rem; color: var(--text2); }
+
   /* Responsive */
   @media (max-width: 900px) {
     .app { flex-direction: column; height: auto; }
@@ -794,51 +812,77 @@
     <!-- Route 1: XMP生成 -->
     <div id="step4-xmp" class="route-content" data-routes="1">
       <h2><span class="step-badge green">STEP 4</span> XMP生成（XML → XMP変換）</h2>
-      <p class="desc">Metashapeのcamera.xmlから各透視投影画像のXMPサイドカーファイルを生成します。</p>
-      <div class="time-est">&#x23F1; 所要時間: 数秒</div>
+      <p class="desc">Metashapeのcamera.xmlから各透視投影画像のXMPサイドカーファイルを生成し、不要画像を間引きます。</p>
+      <div class="time-est">&#x23F1; 所要時間: 数秒〜数分</div>
 
+      <!-- 4-1: XMP生成 -->
       <div class="card">
-        <h3>変換内容</h3>
-        <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
-          Metashapeの c2w 行列をトランスポーズして w2c に変換し、RealityCapture用のXMP形式で書き出します。
-        </p>
-        <table class="data-table">
-          <tr><th>項目</th><th>値</th></tr>
-          <tr><td>xcr:Rotation</td><td>c2w → <b>転置して w2c</b>、行優先9値</td></tr>
-          <tr><td>PosePrior</td><td><b>exact</b>（相対位置を維持）</td></tr>
-          <tr><td>CalibrationPrior</td><td><b>exact</b></td></tr>
-          <tr><td>中心点</td><td>8方向すべて同一（オフセットなし）</td></tr>
-        </table>
-      </div>
+        <h3>ワークフロー</h3>
 
-      <div class="card">
-        <h3>PosePriorの選択肢</h3>
-        <div class="choices">
-          <div class="choice selected" onclick="selectChoice(this)">
-            <div class="choice-title">exact
-              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP設定をexactで生成。PosePrior=exact, CalibrationPrior=exact。相対位置を維持し、RSが大きく動かさない安定モード。', this)">Copy</button>
+        <div class="substep">
+          <span class="substep-num">4-1</span>
+          <div class="substep-content">
+            <div class="substep-title">XMP生成
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('camera.xmlから透視投影画像のXMPサイドカーファイルを生成してください。c2w→転置w2c、PosePrior=exact、CalibrationPrior=exact。', this)">Copy</button>
             </div>
-            <div class="choice-desc">相対位置を維持。RSが大きく動かさない。安定。</div>
-            <div class="choice-tag tag-rec">推奨</div>
-          </div>
-          <div class="choice" onclick="selectChoice(this)">
-            <div class="choice-title">initial
-              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP設定をinitialで生成。PosePrior=initial, CalibrationPrior=initial。RSが特徴点ベースで位置・向きを自由に微調整。スプリット（分離）する場合あり。', this)">Copy</button>
+            <div class="substep-desc">
+              Metashapeの c2w 行列をトランスポーズして w2c に変換し、RealityCapture用のXMP形式で書き出します。
             </div>
-            <div class="choice-desc">RSが自由に調整可能。スプリットが起きる場合あり。</div>
-            <div class="choice-tag tag-warn">不安定な場合あり</div>
-          </div>
-          <div class="choice" onclick="selectChoice(this)">
-            <div class="choice-title">locked
-              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP設定をlockedで生成。PosePrior=locked, CalibrationPrior=locked。カメラ位置を完全に固定、RSは一切変更しない。', this)">Copy</button>
+
+            <table class="data-table" style="margin-top:10px;">
+              <tr><th>項目</th><th>値</th></tr>
+              <tr><td>xcr:Rotation</td><td>c2w → <b>転置して w2c</b>、行優先9値</td></tr>
+              <tr><td>PosePrior</td><td><b>exact</b>（相対位置を維持）</td></tr>
+              <tr><td>CalibrationPrior</td><td><b>exact</b></td></tr>
+              <tr><td>中心点</td><td>8方向すべて同一（オフセットなし）</td></tr>
+            </table>
+
+            <div style="margin-top:12px;">
+              <div class="choices">
+                <div class="choice selected" onclick="selectChoice(this)">
+                  <div class="choice-title">exact
+                    <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP設定をexactで生成。PosePrior=exact, CalibrationPrior=exact。相対位置を維持し、RSが大きく動かさない安定モード。', this)">Copy</button>
+                  </div>
+                  <div class="choice-desc">相対位置を維持。RSが大きく動かさない。安定。</div>
+                  <div class="choice-tag tag-rec">推奨</div>
+                </div>
+                <div class="choice" onclick="selectChoice(this)">
+                  <div class="choice-title">initial
+                    <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP設定をinitialで生成。PosePrior=initial, CalibrationPrior=initial。RSが特徴点ベースで位置・向きを自由に微調整。スプリット（分離）する場合あり。', this)">Copy</button>
+                  </div>
+                  <div class="choice-desc">RSが自由に調整可能。スプリットが起きる場合あり。</div>
+                  <div class="choice-tag tag-warn">不安定な場合あり</div>
+                </div>
+                <div class="choice" onclick="selectChoice(this)">
+                  <div class="choice-title">locked
+                    <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP設定をlockedで生成。PosePrior=locked, CalibrationPrior=locked。カメラ位置を完全に固定、RSは一切変更しない。', this)">Copy</button>
+                  </div>
+                  <div class="choice-desc">完全に固定。RSは位置を一切変更しない。</div>
+                </div>
+              </div>
             </div>
-            <div class="choice-desc">完全に固定。RSは位置を一切変更しない。</div>
+
+            <div class="note note-green" style="margin-top:10px;">
+              <b>テスト結果:</b> <code>exact</code> モードが最も安定。<code>initial</code> はRSが位置を調整してスプリット（分離）する場合があります。
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="note note-green">
-        <b>テスト結果:</b> <code>exact</code> モードが最も安定。<code>initial</code> はRSが位置を調整してスプリット（分離）する場合があります。
+        <!-- 4-2: 画像の間引き -->
+        <div class="substep">
+          <span class="substep-num">4-2</span>
+          <div class="substep-content">
+            <div class="substep-title">画像の間引き
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('透視投影画像から人物や動いている物体が映っている画像を間引いてください。間引いた後、対応するXMPサイドカーファイルも削除してください。', this)">Copy</button>
+            </div>
+            <div class="substep-desc">
+              透視投影画像から人物や動いている物体が映っている画像を間引きます。間引いた画像に対応するXMPファイルも削除します。
+            </div>
+            <div class="note note-warn" style="margin-top:8px;">
+              <b>注意:</b> 動的オブジェクト（人物、車両など）が3DGS品質を下げるため、事前に間引くことを推奨します。
+            </div>
+          </div>
+        </div>
       </div>
 
       <details>
@@ -858,30 +902,95 @@
     <!-- Route 2: XML変換（全天球→透視投影） -->
     <div id="step4-xml-convert" class="route-content" data-routes="2" style="display:none;">
       <h2><span class="step-badge green">STEP 4</span> XML変換（全天球 → 透視投影）</h2>
-      <p class="desc">全天球用のcamera.xmlを透視投影画像用のピンホールカメラXMLに変換します。</p>
-      <div class="time-est">&#x23F1; 所要時間: 数秒</div>
+      <p class="desc">全天球用のcamera.xmlを透視投影XMLに変換し、不要画像を間引き、Metashapeにインポートします。</p>
+      <div class="time-est">&#x23F1; 所要時間: 数分</div>
 
       <div class="card">
-        <h3>変換内容</h3>
-        <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
-          Metashapeの全天球（Spherical）カメラXMLを、透視投影画像に対応するピンホールカメラのXMLに変換します。
-        </p>
-        <table class="data-table">
-          <tr><th>項目</th><th>入力</th><th>出力</th></tr>
-          <tr><td>カメラモデル</td><td>Spherical</td><td>Pinhole (frame)</td></tr>
-          <tr><td>画像</td><td>全天球 7680x3840</td><td>透視投影 1920x1920</td></tr>
-          <tr><td>FOV</td><td>360度</td><td>90度</td></tr>
-        </table>
-      </div>
+        <h3>ワークフロー</h3>
 
-      <div class="card">
-        <h3>分割パターン選択</h3>
-        <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
-          STEP 3で選択した分割パターンと同じものを使用してください（パターンA/B/C）。
-        </p>
-        <div class="note">
-          <b>仕組み:</b> 各全天球フレームのc2w行列にyaw回転を適用し、透視投影カメラの位置・向きとしてXMLに書き出します。
-          Metashapeでインポートすると透視投影画像のカメラ位置が復元されます。
+        <!-- 4-1: XML変換 -->
+        <div class="substep">
+          <span class="substep-num">4-1</span>
+          <div class="substep-content">
+            <div class="substep-title">XML変換
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('全天球XMLを透視投影XMLに変換してください。パターンC（16方向: 水平8+上4+下4）で、1920x1920、FOV90度。', this)">Copy</button>
+            </div>
+            <div class="substep-desc">
+              Metashapeの全天球（Spherical）カメラXMLを、透視投影画像に対応するピンホールカメラのXMLに変換します。
+            </div>
+
+            <table class="data-table" style="margin-top:10px;">
+              <tr><th>項目</th><th>入力</th><th>出力</th></tr>
+              <tr><td>カメラモデル</td><td>Spherical</td><td>Pinhole (frame)</td></tr>
+              <tr><td>画像</td><td>全天球 7680x3840</td><td>透視投影 1920x1920</td></tr>
+              <tr><td>FOV</td><td>360度</td><td>90度</td></tr>
+            </table>
+
+            <div style="margin-top:10px;">
+              <p style="font-size:0.82rem; color:var(--text2); margin-bottom:8px;">
+                STEP 3で選択した分割パターンと同じものを使用してください:
+              </p>
+              <div class="choices">
+                <div class="choice" onclick="selectChoice(this)">
+                  <div class="choice-title">パターンA: 8方向
+                    <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('全天球XMLを透視投影XMLに変換してください。パターンA（8方向: 水平8）で、1920x1920、FOV90度。', this)">Copy</button>
+                  </div>
+                  <div class="choice-desc">水平8枚（45度間隔）</div>
+                </div>
+                <div class="choice" onclick="selectChoice(this)">
+                  <div class="choice-title">パターンB: 12方向
+                    <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('全天球XMLを透視投影XMLに変換してください。パターンB（12方向: 水平8+上2+下2）で、1920x1920、FOV90度。', this)">Copy</button>
+                  </div>
+                  <div class="choice-desc">水平8 + 上2 + 下2</div>
+                </div>
+                <div class="choice selected" onclick="selectChoice(this)">
+                  <div class="choice-title">パターンC: 16方向
+                    <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('全天球XMLを透視投影XMLに変換してください。パターンC（16方向: 水平8+上4+下4）で、1920x1920、FOV90度。', this)">Copy</button>
+                  </div>
+                  <div class="choice-desc">水平8 + 上4 + 下4</div>
+                  <div class="choice-tag tag-rec">推奨</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="note" style="margin-top:10px;">
+              <b>仕組み:</b> 各全天球フレームのc2w行列にyaw回転を適用し、透視投影カメラの位置・向きとしてXMLに書き出します。
+              Metashapeでインポートすると透視投影画像のカメラ位置が復元されます。
+            </div>
+          </div>
+        </div>
+
+        <!-- 4-2: 画像の間引き -->
+        <div class="substep">
+          <span class="substep-num">4-2</span>
+          <div class="substep-content">
+            <div class="substep-title">画像の間引き
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('透視投影画像から人物や動いている物体が映っている画像を間引いてください。間引いた後、XMLから対応するカメラエントリも削除してください。', this)">Copy</button>
+            </div>
+            <div class="substep-desc">
+              透視投影画像から人物や動いている物体が映っている画像を間引きます。間引いた画像に対応するカメラエントリをXMLからも削除します。
+            </div>
+            <div class="note note-warn" style="margin-top:8px;">
+              <b>注意:</b> 動的オブジェクト（人物、車両など）が3DGS品質を下げるため、事前に間引くことを推奨します。
+            </div>
+            <div class="note note-purple" style="margin-top:8px;">
+              <b>補足:</b> 間引き後のXMLの書き換えはClaude Codeで対応します。
+            </div>
+          </div>
+        </div>
+
+        <!-- 4-3: Metashapeへインポート -->
+        <div class="substep">
+          <span class="substep-num">4-3</span>
+          <div class="substep-content">
+            <div class="substep-title">Metashapeへインポート
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('間引き済みの透視投影画像と変換済みXMLをMetashapeにインポートしてください。Add Photos → images_P/ の画像を追加 → Import Cameras → 変換済みXMLを読み込み。', this)">Copy</button>
+            </div>
+            <div class="substep-desc">
+              間引き済みの透視投影画像（images_P/）と変換済みXMLをMetashapeにインポートします。<br>
+              <b>Add Photos</b> → images_P/ の画像を追加 → <b>File → Import → Import Cameras</b> → 変換済みXMLを読み込み。
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -909,14 +1018,35 @@
         <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
           フレーム数が多い場合はエリアに分割してRSで処理。すべての分割パターンで2フレームのオーバーラップを入れる。
         </p>
-        <table class="data-table">
-          <tr><th>分割数</th><th>1エリアのフレーム数</th><th>RS処理時間/エリア</th><th>PLYサイズ</th><th>備考</th></tr>
-          <tr style="background:rgba(34,197,94,0.05);">
-            <td><b>24分割</b></td><td>~42-46枚</td><td>~10分</td><td>~800MB</td><td style="color:var(--green);">推奨</td>
-          </tr>
-          <tr><td>12分割</td><td>~86-89枚</td><td>~20分</td><td>~1.5GB</td><td>中規模向け</td></tr>
-          <tr><td>2分割</td><td>~500枚</td><td>~60分+</td><td>~6GB</td><td style="color:var(--orange);">ダウンサンプリング必要</td></tr>
-        </table>
+
+        <div class="form-grid" style="margin-bottom:14px;">
+          <div class="form-group">
+            <label>分割設定</label>
+            <select id="s5r1-division-mode" onchange="calcDivisionR1()">
+              <option value="none">分割なし（一括処理）</option>
+              <option value="divide" selected>分割あり</option>
+            </select>
+          </div>
+          <div class="form-group" id="s5r1-division-count-group">
+            <label>分割数</label>
+            <input type="number" id="s5r1-division-count" value="24" min="2" onchange="calcDivisionR1()" oninput="calcDivisionR1()">
+          </div>
+          <div class="form-group">
+            <label>総フレーム数</label>
+            <input type="number" id="s5r1-total-frames" value="1010" min="1" onchange="calcDivisionR1()" oninput="calcDivisionR1()">
+          </div>
+          <div class="form-group">
+            <label>オーバーラップフレーム数</label>
+            <input type="number" value="2" readonly style="background:var(--bg); color:var(--text2);">
+          </div>
+        </div>
+
+        <div id="s5r1-division-result" style="padding:14px; background:var(--surface2); border-radius:var(--radius); font-size:0.9rem; margin-bottom:12px;">
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="copyDivisionTextR1()">指示テキストをコピー</button>
+        </div>
       </div>
 
       <div class="card">
@@ -940,36 +1070,92 @@
     <!-- Route 2: Metashapeカメラ最適化 -->
     <div id="step5-metashape-opt" class="route-content" data-routes="2" style="display:none;">
       <h2><span class="step-badge purple">STEP 5</span> Metashapeカメラ最適化</h2>
-      <p class="desc">透視投影画像と変換済みXMLをMetashapeにインポートし、アライメントを最適化します。</p>
+      <p class="desc">透視投影画像と変換済みXMLをMetashapeにインポートし、アライメントを最適化してエクスポートします。</p>
       <div class="time-est">&#x23F1; 所要時間: 画像数による &nbsp; <span class="tag tag-manual">手動操作</span></div>
 
       <div class="card">
-        <h3>手順</h3>
-        <ul class="steps-list">
-          <li>Metashapeに透視投影画像（images_P/）を読み込み</li>
-          <li>STEP 4で変換したXMLをインポート（File → Import → Import Cameras）</li>
-          <li>アライメント最適化を実行</li>
-          <li>結果を確認し、最適化済みXML + PLYをエクスポート</li>
-        </ul>
+        <h3>ワークフロー</h3>
+
+        <!-- 5-1: 分割設定 -->
+        <div class="substep">
+          <span class="substep-num">5-1</span>
+          <div class="substep-content">
+            <div class="substep-title">分割設定</div>
+            <div class="substep-desc">
+              フレーム数が多い場合はエリアに分割して処理します。128GB RAMなら16,000枚程度は一括処理可能です。
+            </div>
+
+            <div class="form-grid" style="margin-top:10px;">
+              <div class="form-group">
+                <label>分割設定</label>
+                <select id="s5r2-division-mode" onchange="calcDivisionR2()">
+                  <option value="none">分割なし（一括処理）</option>
+                  <option value="divide">分割あり</option>
+                </select>
+              </div>
+              <div class="form-group" id="s5r2-division-count-group" style="display:none;">
+                <label>分割数</label>
+                <input type="number" id="s5r2-division-count" value="24" min="2" onchange="calcDivisionR2()" oninput="calcDivisionR2()">
+              </div>
+              <div class="form-group">
+                <label>総フレーム数</label>
+                <input type="number" id="s5r2-total-frames" value="1010" min="1" onchange="calcDivisionR2()" oninput="calcDivisionR2()">
+              </div>
+              <div class="form-group">
+                <label>オーバーラップフレーム数</label>
+                <input type="number" value="2" readonly style="background:var(--bg); color:var(--text2);">
+              </div>
+            </div>
+
+            <div id="s5r2-division-result" style="padding:14px; background:var(--surface2); border-radius:var(--radius); font-size:0.9rem; margin-top:10px;">
+            </div>
+
+            <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-sm" onclick="copyDivisionTextR2()">指示テキストをコピー</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5-2: Metashapeアライメント -->
+        <div class="substep">
+          <span class="substep-num">5-2</span>
+          <div class="substep-content">
+            <div class="substep-title">Metashapeアライメント
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('Metashapeに透視投影画像（images_P/）と変換済みXMLをインポートし、Align Photosを実行してください。精度=高、キーポイント上限=40000、タイポイント上限=4000。', this)">Copy</button>
+            </div>
+            <div class="substep-desc">
+              透視投影画像とXMLをMetashapeにインポートし、アライメントを実行します。
+            </div>
+            <ul class="steps-list" style="margin-top:8px;">
+              <li>Metashapeに透視投影画像（images_P/）を読み込み</li>
+              <li>STEP 4で変換したXMLをインポート（File → Import → Import Cameras）</li>
+              <li><b>Align Photos</b> を実行</li>
+              <li>アライメント結果を確認</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 5-3: エクスポート -->
+        <div class="substep">
+          <span class="substep-num">5-3</span>
+          <div class="substep-content">
+            <div class="substep-title">エクスポート
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('Metashapeから最適化済みカメラXMLとPLY点群データをエクスポートしてください。Export Cameras → XML、Export Points → PLY。', this)">Copy</button>
+            </div>
+            <div class="substep-desc">
+              最適化済みのカメラパラメータとポイントクラウドをエクスポートします。
+            </div>
+            <table class="data-table" style="margin-top:8px;">
+              <tr><th>ファイル</th><th>説明</th></tr>
+              <tr><td>最適化済みXML</td><td>カメラ位置・内部パラメータが最適化されたXML</td></tr>
+              <tr><td>PLY</td><td>点群データ</td></tr>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>メモリ・スケーラビリティ</h3>
-        <div class="note note-green">
-          <b>大規模対応:</b> 16,000枚程度は128GB RAMなら一発で処理可能です。メモリ不足で落ちた場合はエリア分割してください。
-        </div>
-        <div class="note note-warn">
-          <b>画像間引き:</b> 人や動いている物が写っている画像は間引き予定。動的オブジェクトが3DGS品質を下げるため。
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>出力</h3>
-        <table class="data-table">
-          <tr><th>ファイル</th><th>説明</th></tr>
-          <tr><td>最適化済みXML</td><td>カメラ位置・内部パラメータが最適化されたXML</td></tr>
-          <tr><td>PLY</td><td>点群データ</td></tr>
-        </table>
+      <div class="note note-green">
+        <b>大規模対応:</b> 16,000枚程度は128GB RAMなら一発で処理可能です。メモリ不足で落ちた場合はエリア分割してください。
       </div>
     </div>
 
@@ -1746,6 +1932,10 @@ function loadState() {
     // Restore panel
     if (s._panel) showPanel(s._panel);
 
+    // Initialize division calculators
+    calcDivisionR1();
+    calcDivisionR2();
+
     updateProgress();
   } catch(e) {
     selectRoute(1);
@@ -1792,6 +1982,142 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadState();
 });
+
+// ============================================================
+// Step 5: Division calculator (Route 1 - RS)
+// ============================================================
+function calcDivisionR1() {
+  const mode = document.getElementById('s5r1-division-mode').value;
+  const countGroup = document.getElementById('s5r1-division-count-group');
+  const totalFrames = parseInt(document.getElementById('s5r1-total-frames').value) || 0;
+  const result = document.getElementById('s5r1-division-result');
+
+  if (mode === 'none') {
+    countGroup.style.display = 'none';
+    result.innerHTML = `
+      <div style="text-align:center;">
+        <div style="font-size:1.2rem; font-weight:700; color:var(--accent);">一括処理</div>
+        <div style="font-size:0.82rem; color:var(--text2); margin-top:4px;">全 ${totalFrames.toLocaleString()} フレームを一括でRSにAlign+エクスポート</div>
+      </div>`;
+  } else {
+    countGroup.style.display = '';
+    const divCount = parseInt(document.getElementById('s5r1-division-count').value) || 24;
+    const overlap = 2;
+    const baseFrames = Math.floor(totalFrames / divCount);
+    const maxFrames = baseFrames + overlap;
+    result.innerHTML = `
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; text-align:center;">
+        <div>
+          <div style="font-size:1.2rem; font-weight:700; color:var(--accent);">${divCount}</div>
+          <div style="font-size:0.72rem; color:var(--text2);">エリア数</div>
+        </div>
+        <div>
+          <div style="font-size:1.2rem; font-weight:700; color:var(--accent);">${baseFrames}〜${maxFrames}</div>
+          <div style="font-size:0.72rem; color:var(--text2);">フレーム/エリア</div>
+        </div>
+        <div>
+          <div style="font-size:1.2rem; font-weight:700; color:var(--green);">${overlap}</div>
+          <div style="font-size:0.72rem; color:var(--text2);">オーバーラップ</div>
+        </div>
+        <div>
+          <div style="font-size:1.2rem; font-weight:700; color:var(--text);">${totalFrames.toLocaleString()}</div>
+          <div style="font-size:0.72rem; color:var(--text2);">総フレーム数</div>
+        </div>
+      </div>`;
+  }
+  saveState();
+}
+
+function copyDivisionTextR1() {
+  const mode = document.getElementById('s5r1-division-mode').value;
+  const totalFrames = parseInt(document.getElementById('s5r1-total-frames').value) || 0;
+  let text = '';
+  if (mode === 'none') {
+    text = '全画像を一括でRSにAlign+エクスポートしてください。CSV+PLYを出力。';
+  } else {
+    const divCount = parseInt(document.getElementById('s5r1-division-count').value) || 24;
+    const overlap = 2;
+    const baseFrames = Math.floor(totalFrames / divCount);
+    const maxFrames = baseFrames + overlap;
+    text = `画像を${divCount}エリアに分割してください（${overlap}フレームオーバーラップ）。各エリアごとにRSでAlign → CSV+PLYエクスポート。1エリアあたり約${baseFrames}〜${maxFrames}フレーム。`;
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.background = 'var(--green)';
+    btn.style.color = '#000';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 1500);
+  });
+}
+
+// ============================================================
+// Step 5: Division calculator (Route 2 - Metashape)
+// ============================================================
+function calcDivisionR2() {
+  const mode = document.getElementById('s5r2-division-mode').value;
+  const countGroup = document.getElementById('s5r2-division-count-group');
+  const totalFrames = parseInt(document.getElementById('s5r2-total-frames').value) || 0;
+  const result = document.getElementById('s5r2-division-result');
+
+  if (mode === 'none') {
+    countGroup.style.display = 'none';
+    result.innerHTML = `
+      <div style="text-align:center;">
+        <div style="font-size:1.2rem; font-weight:700; color:var(--accent);">一括処理</div>
+        <div style="font-size:0.82rem; color:var(--text2); margin-top:4px;">全 ${totalFrames.toLocaleString()} フレームを一括でMetashapeアライメント</div>
+      </div>`;
+  } else {
+    countGroup.style.display = '';
+    const divCount = parseInt(document.getElementById('s5r2-division-count').value) || 24;
+    const overlap = 2;
+    const baseFrames = Math.floor(totalFrames / divCount);
+    const maxFrames = baseFrames + overlap;
+    result.innerHTML = `
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; text-align:center;">
+        <div>
+          <div style="font-size:1.2rem; font-weight:700; color:var(--accent);">${divCount}</div>
+          <div style="font-size:0.72rem; color:var(--text2);">エリア数</div>
+        </div>
+        <div>
+          <div style="font-size:1.2rem; font-weight:700; color:var(--accent);">${baseFrames}〜${maxFrames}</div>
+          <div style="font-size:0.72rem; color:var(--text2);">フレーム/エリア</div>
+        </div>
+        <div>
+          <div style="font-size:1.2rem; font-weight:700; color:var(--green);">${overlap}</div>
+          <div style="font-size:0.72rem; color:var(--text2);">オーバーラップ</div>
+        </div>
+        <div>
+          <div style="font-size:1.2rem; font-weight:700; color:var(--text);">${totalFrames.toLocaleString()}</div>
+          <div style="font-size:0.72rem; color:var(--text2);">総フレーム数</div>
+        </div>
+      </div>`;
+  }
+  saveState();
+}
+
+function copyDivisionTextR2() {
+  const mode = document.getElementById('s5r2-division-mode').value;
+  const totalFrames = parseInt(document.getElementById('s5r2-total-frames').value) || 0;
+  let text = '';
+  if (mode === 'none') {
+    text = '全画像を一括でMetashapeにインポートしてアライメント+エクスポートしてください。最適化済みXML+PLYを出力。';
+  } else {
+    const divCount = parseInt(document.getElementById('s5r2-division-count').value) || 24;
+    const overlap = 2;
+    const baseFrames = Math.floor(totalFrames / divCount);
+    const maxFrames = baseFrames + overlap;
+    text = `画像を${divCount}エリアに分割してください（${overlap}フレームオーバーラップ）。各エリアごとにMetashapeでAlign → 最適化済みXML+PLYエクスポート。1エリアあたり約${baseFrames}〜${maxFrames}フレーム。`;
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.background = 'var(--green)';
+    btn.style.color = '#000';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 1500);
+  });
+}
 
 // Auto-save on input changes
 document.querySelectorAll('input, select').forEach(el => {
