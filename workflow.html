@@ -84,6 +84,9 @@
     opacity: 0.35;
     pointer-events: none;
   }
+  .nav-item.route-hidden {
+    display: none;
+  }
   .nav-icon {
     width: 30px; height: 30px;
     border-radius: 8px;
@@ -428,35 +431,35 @@
   </a>
 
   <div class="sidebar-section">ワークフロー</div>
-  <a class="nav-item" onclick="showPanel('step1')" data-panel="step1" data-step-id="step1">
-    <input type="checkbox" class="nav-check" data-step="1" onclick="event.stopPropagation(); updateProgress();">
+  <a class="nav-item" onclick="showPanel('step1')" data-panel="step1">
+    <input type="checkbox" class="nav-check" data-step="step1" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s1">1</div>
     <span class="nav-label">フレーム抽出</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step2')" data-panel="step2" data-step-id="step2">
-    <input type="checkbox" class="nav-check" data-step="2" onclick="event.stopPropagation(); updateProgress();">
+  <a class="nav-item" onclick="showPanel('step2')" data-panel="step2">
+    <input type="checkbox" class="nav-check" data-step="step2" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s2">2</div>
     <span class="nav-label">Metashape全天球Align</span>
     <span class="tag tag-manual">手動</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step3')" data-panel="step3" data-step-id="step3">
-    <input type="checkbox" class="nav-check" data-step="3" onclick="event.stopPropagation(); updateProgress();">
+  <a class="nav-item" onclick="showPanel('step3')" data-panel="step3">
+    <input type="checkbox" class="nav-check" data-step="step3" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s3">3</div>
     <span class="nav-label">FFmpeg分割 / LF直接</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step4')" data-panel="step4" data-step-id="step4">
-    <input type="checkbox" class="nav-check" data-step="4" onclick="event.stopPropagation(); updateProgress();">
+  <a class="nav-item" onclick="showPanel('step4')" data-panel="step4" data-routes="1,2">
+    <input type="checkbox" class="nav-check" data-step="step4" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s4">4</div>
     <span class="nav-label">XMP生成 / XML変換</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step5')" data-panel="step5" data-step-id="step5">
-    <input type="checkbox" class="nav-check" data-step="5" onclick="event.stopPropagation(); updateProgress();">
+  <a class="nav-item" onclick="showPanel('step5')" data-panel="step5" data-routes="1,2">
+    <input type="checkbox" class="nav-check" data-step="step5" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s5">5</div>
     <span class="nav-label">RS Align / MS最適化</span>
     <span class="tag tag-manual">手動</span>
   </a>
-  <a class="nav-item" onclick="showPanel('step6')" data-panel="step6" data-step-id="step6">
-    <input type="checkbox" class="nav-check" data-step="6" onclick="event.stopPropagation(); updateProgress();">
+  <a class="nav-item" onclick="showPanel('step6')" data-panel="step6">
+    <input type="checkbox" class="nav-check" data-step="step6" onclick="event.stopPropagation(); updateProgress();">
     <div class="nav-icon s6">6</div>
     <span class="nav-label">3DGSトレーニング</span>
   </a>
@@ -806,16 +809,31 @@
     </div>
   </div>
 
-  <!-- ==================== STEP 4: Route 1 = XMP生成, Route 2 = XML変換 ==================== -->
+  <!-- ==================== STEP 4: XMP生成 / XML変換 (merged) ==================== -->
   <div class="panel" id="panel-step4">
+    <h2><span class="step-badge green">STEP 4</span> XMP生成 / XML変換</h2>
+    <p class="desc">Metashapeのcamera.xmlからXMPサイドカーファイルを生成（RS経由）、または透視投影XMLに変換（Metashape経由）します。</p>
 
-    <!-- Route 1: XMP生成 -->
-    <div id="step4-xmp" class="route-content" data-routes="1">
-      <h2><span class="step-badge green">STEP 4</span> XMP生成（XML → XMP変換）</h2>
-      <p class="desc">Metashapeのcamera.xmlから各透視投影画像のXMPサイドカーファイルを生成し、不要画像を間引きます。</p>
+    <div class="card">
+      <h3>変換方式の選択</h3>
+      <div class="choices">
+        <div class="choice selected" onclick="selectStep4Tool('xmp')" id="step4-tool-xmp">
+          <div class="choice-title">XMP生成 <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XMP生成方式で進めます。XMLからXMPを生成し、RSに渡してアライメントします。', this)">Copy</button></div>
+          <div class="choice-desc">XMLからXMPを生成しRSに渡す。RS経由ワークフロー。</div>
+          <div class="choice-tag tag-rec">RS経由</div>
+        </div>
+        <div class="choice" onclick="selectStep4Tool('xml')" id="step4-tool-xml">
+          <div class="choice-title">XML変換 <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('XML変換方式で進めます。全天球XMLを透視投影XMLに変換し、Metashapeでカメラ最適化します。', this)">Copy</button></div>
+          <div class="choice-desc">全天球XMLを透視投影XMLに変換しMetashapeに戻す。</div>
+          <div class="choice-tag">Metashape経由</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- XMP section (shown when xmp selected) -->
+    <div id="step4-xmp-section">
       <div class="time-est">&#x23F1; 所要時間: 数秒〜数分</div>
 
-      <!-- 4-1: XMP生成 -->
       <div class="card">
         <h3>ワークフロー</h3>
 
@@ -868,7 +886,6 @@
           </div>
         </div>
 
-        <!-- 4-2: 画像の間引き -->
         <div class="substep">
           <span class="substep-num">4-2</span>
           <div class="substep-content">
@@ -899,16 +916,13 @@
       </details>
     </div>
 
-    <!-- Route 2: XML変換（全天球→透視投影） -->
-    <div id="step4-xml-convert" class="route-content" data-routes="2" style="display:none;">
-      <h2><span class="step-badge green">STEP 4</span> XML変換（全天球 → 透視投影）</h2>
-      <p class="desc">全天球用のcamera.xmlを透視投影XMLに変換し、不要画像を間引き、Metashapeにインポートします。</p>
+    <!-- XML section (shown when xml selected) -->
+    <div id="step4-xml-section" style="display:none">
       <div class="time-est">&#x23F1; 所要時間: 数分</div>
 
       <div class="card">
         <h3>ワークフロー</h3>
 
-        <!-- 4-1: XML変換 -->
         <div class="substep">
           <span class="substep-num">4-1</span>
           <div class="substep-content">
@@ -960,7 +974,6 @@
           </div>
         </div>
 
-        <!-- 4-2: 画像の間引き -->
         <div class="substep">
           <span class="substep-num">4-2</span>
           <div class="substep-content">
@@ -979,7 +992,6 @@
           </div>
         </div>
 
-        <!-- 4-3: Metashapeへインポート -->
         <div class="substep">
           <span class="substep-num">4-3</span>
           <div class="substep-content">
@@ -994,22 +1006,30 @@
         </div>
       </div>
     </div>
-
-    <!-- Route 3: このステップはルート3では存在しない（ルート3はSTEP3で終了） -->
-    <div id="step4-none" class="route-content" data-routes="3" style="display:none;">
-      <h2><span class="step-badge green">STEP 4</span></h2>
-      <div class="note">
-        <b>ルート3では不要:</b> ルート3（全天球直接）ではSTEP3のLichtFeld Studioで処理が完了するため、このステップは不要です。
-      </div>
-    </div>
   </div>
 
-  <!-- ==================== STEP 5: Route 1 = RS Align, Route 2 = Metashapeカメラ最適化 ==================== -->
+  <!-- ==================== STEP 5: RS Align / Metashapeカメラ最適化 (merged) ==================== -->
   <div class="panel" id="panel-step5">
+    <h2><span class="step-badge purple">STEP 5</span> RS Align / Metashapeカメラ最適化</h2>
 
-    <!-- Route 1: RS Align + エクスポート -->
-    <div id="step5-rs" class="route-content" data-routes="1">
-      <h2><span class="step-badge purple">STEP 5</span> RS Align + エクスポート</h2>
+    <div class="card">
+      <h3>処理ツールの選択</h3>
+      <div class="choices">
+        <div class="choice selected" onclick="selectStep5Tool('rs')" id="step5-tool-rs">
+          <div class="choice-title">RealityScan Align <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('RealityScanでアライメントしてください。CSV+PLYをエクスポート。', this)">Copy</button></div>
+          <div class="choice-desc">RSでアライメント＋メッシュ構築。CSV+PLYエクスポート。</div>
+          <div class="choice-tag tag-rec">検証済み</div>
+        </div>
+        <div class="choice" onclick="selectStep5Tool('ms')" id="step5-tool-ms">
+          <div class="choice-title">Metashapeカメラ最適化 <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('Metashapeでカメラ最適化してください。最適化後のXML+PLYをエクスポート。', this)">Copy</button></div>
+          <div class="choice-desc">Metashapeでカメラ最適化。XML+PLYエクスポート。</div>
+          <div class="choice-tag">新規</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RS section -->
+    <div id="step5-rs-section">
       <p class="desc">XMP付き画像をRealityCaptureに読み込み、Align → メッシュ構築 → CSV + PLY エクスポート。</p>
       <div class="time-est">&#x23F1; Align ~1分/エリア + Mesh ~8分/エリア（24分割時） &nbsp; <span class="tag tag-manual">手動操作</span></div>
 
@@ -1067,16 +1087,14 @@
       </div>
     </div>
 
-    <!-- Route 2: Metashapeカメラ最適化 -->
-    <div id="step5-metashape-opt" class="route-content" data-routes="2" style="display:none;">
-      <h2><span class="step-badge purple">STEP 5</span> Metashapeカメラ最適化</h2>
+    <!-- MS section -->
+    <div id="step5-ms-section" style="display:none">
       <p class="desc">透視投影画像と変換済みXMLをMetashapeにインポートし、アライメントを最適化してエクスポートします。</p>
       <div class="time-est">&#x23F1; 所要時間: 画像数による &nbsp; <span class="tag tag-manual">手動操作</span></div>
 
       <div class="card">
         <h3>ワークフロー</h3>
 
-        <!-- 5-1: 分割設定 -->
         <div class="substep">
           <span class="substep-num">5-1</span>
           <div class="substep-content">
@@ -1116,7 +1134,6 @@
           </div>
         </div>
 
-        <!-- 5-2: Metashapeアライメント -->
         <div class="substep">
           <span class="substep-num">5-2</span>
           <div class="substep-content">
@@ -1135,7 +1152,6 @@
           </div>
         </div>
 
-        <!-- 5-3: エクスポート -->
         <div class="substep">
           <span class="substep-num">5-3</span>
           <div class="substep-content">
@@ -1156,14 +1172,6 @@
 
       <div class="note note-green">
         <b>大規模対応:</b> 16,000枚程度は128GB RAMなら一発で処理可能です。メモリ不足で落ちた場合はエリア分割してください。
-      </div>
-    </div>
-
-    <!-- Route 3: N/A -->
-    <div id="step5-none" class="route-content" data-routes="3" style="display:none;">
-      <h2><span class="step-badge purple">STEP 5</span></h2>
-      <div class="note">
-        <b>ルート3では不要:</b> ルート3（全天球直接）ではSTEP3で処理が完了するため、このステップは不要です。
       </div>
     </div>
   </div>
@@ -1405,7 +1413,6 @@ const ROUTES = {
 };
 
 let currentRoute = 1;
-const ALL_STEPS = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'];
 
 // ============================================================
 // Route selection
@@ -1416,6 +1423,15 @@ function selectRoute(routeNum) {
   // Update route cards
   document.querySelectorAll('.route-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('route-card-' + routeNum).classList.add('selected');
+
+  // Auto-select step4/step5 tools based on route
+  if (routeNum === 1) {
+    selectStep4Tool('xmp');
+    selectStep5Tool('rs');
+  } else if (routeNum === 2) {
+    selectStep4Tool('xml');
+    selectStep5Tool('ms');
+  }
 
   // Update flow overview
   updateFlowOverview();
@@ -1440,11 +1456,10 @@ function updateFlowOverview() {
   const container = document.getElementById('flow-overview');
   let html = '';
   route.steps.forEach((stepId, i) => {
-    const stepNum = ALL_STEPS.indexOf(stepId) + 1;
-    const cb = document.querySelector(`.nav-check[data-step="${stepNum}"]`);
+    const cb = document.querySelector(`.nav-check[data-step="${stepId}"]`);
     const done = cb && cb.checked ? ' done' : '';
     html += `<div class="flow-node active-route${done}" onclick="showPanel('${stepId}')">`;
-    html += `<div class="fn-num">STEP ${i + 1}</div>`;
+    html += `<div class="fn-num">STEP ${stepId.replace('step','')}</div>`;
     html += `<div class="fn-label">${route.stepLabels[i]}</div>`;
     html += `</div>`;
     if (i < route.steps.length - 1) {
@@ -1492,17 +1507,32 @@ function updateSummary() {
 
 function updateSidebarSteps() {
   const route = ROUTES[currentRoute];
-  ALL_STEPS.forEach(stepId => {
-    const navItem = document.querySelector(`.nav-item[data-step-id="${stepId}"]`);
-    if (!navItem) return;
-    if (route.steps.includes(stepId)) {
+
+  // Handle route-specific nav items (step4, step5 are visible for routes 1,2)
+  document.querySelectorAll('.nav-item[data-routes]').forEach(navItem => {
+    const routes = navItem.getAttribute('data-routes').split(',').map(Number);
+    if (routes.includes(currentRoute)) {
       navItem.classList.remove('dimmed');
       navItem.style.pointerEvents = '';
+      navItem.style.display = '';
     } else {
       navItem.classList.add('dimmed');
       navItem.style.pointerEvents = 'none';
+      navItem.style.display = 'none';
     }
   });
+
+  // Handle step6 dimming for route 3
+  const step6Nav = document.querySelector('.nav-item[data-panel="step6"]');
+  if (step6Nav) {
+    if (route.steps.includes('step6')) {
+      step6Nav.classList.remove('dimmed');
+      step6Nav.style.pointerEvents = '';
+    } else {
+      step6Nav.classList.add('dimmed');
+      step6Nav.style.pointerEvents = 'none';
+    }
+  }
 }
 
 function updateStepContent() {
@@ -1519,11 +1549,17 @@ function updateStepContent() {
 function showPanel(id) {
   // Check if this step is available in current route
   const route = ROUTES[currentRoute];
-  if (id.startsWith('step') && !route.steps.includes(id)) return;
+  if (id.startsWith('step') && !route.steps.includes(id)) {
+    // For non-route steps, allow overview/coords/tools
+    if (!['overview', 'coords', 'tools'].includes(id)) return;
+  }
 
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
+
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+
   const item = document.querySelector(`.nav-item[data-panel="${id}"]`);
   if (item) item.classList.add('active');
   document.querySelector('.main').scrollTop = 0;
@@ -1571,8 +1607,7 @@ function updateProgress() {
   let total = route.steps.length;
 
   route.steps.forEach(stepId => {
-    const stepNum = ALL_STEPS.indexOf(stepId) + 1;
-    const cb = document.querySelector(`.nav-check[data-step="${stepNum}"]`);
+    const cb = document.querySelector(`.nav-check[data-step="${stepId}"]`);
     if (cb && cb.checked) done++;
     const navItem = cb ? cb.closest('.nav-item') : null;
     if (navItem) {
@@ -1747,6 +1782,34 @@ function selectTrainTool(tool) {
 }
 
 // ============================================================
+// Step 4: Tool selection (XMP / XML)
+// ============================================================
+let currentStep4Tool = 'xmp';
+
+function selectStep4Tool(tool) {
+  currentStep4Tool = tool;
+  document.querySelectorAll('#panel-step4 > .card:first-of-type .choice').forEach(c => c.classList.remove('selected'));
+  document.getElementById('step4-tool-' + tool).classList.add('selected');
+  document.getElementById('step4-xmp-section').style.display = tool === 'xmp' ? 'block' : 'none';
+  document.getElementById('step4-xml-section').style.display = tool === 'xml' ? 'block' : 'none';
+  saveState();
+}
+
+// ============================================================
+// Step 5: Tool selection (RS / MS)
+// ============================================================
+let currentStep5Tool = 'rs';
+
+function selectStep5Tool(tool) {
+  currentStep5Tool = tool;
+  document.querySelectorAll('#panel-step5 > .card:first-of-type .choice').forEach(c => c.classList.remove('selected'));
+  document.getElementById('step5-tool-' + tool).classList.add('selected');
+  document.getElementById('step5-rs-section').style.display = tool === 'rs' ? 'block' : 'none';
+  document.getElementById('step5-ms-section').style.display = tool === 'ms' ? 'block' : 'none';
+  saveState();
+}
+
+// ============================================================
 // Workflow copy-paste
 // ============================================================
 function copyWorkflow(type) {
@@ -1883,6 +1946,8 @@ function saveState() {
   s._route = currentRoute;
   s._splitPattern = currentSplitPattern;
   s._trainTool = currentTrainTool;
+  s._step4Tool = currentStep4Tool;
+  s._step5Tool = currentStep5Tool;
 
   const activePanel = document.querySelector('.panel.active');
   if (activePanel) s._panel = activePanel.id.replace('panel-', '');
@@ -1903,6 +1968,40 @@ function saveState() {
 function loadState() {
   try {
     const s = JSON.parse(localStorage.getItem('3dgs_wf3') || '{}');
+
+    // Migrate old-style checkbox keys (numeric 1-6) to new step IDs
+    if (s._checks) {
+      // If old-format keys exist, migrate them
+      if (s._checks['1'] !== undefined && s._checks['step1'] === undefined) {
+        const oldChecks = s._checks;
+        s._checks = {};
+        if (oldChecks['1']) s._checks['step1'] = true;
+        if (oldChecks['2']) s._checks['step2'] = true;
+        if (oldChecks['3']) s._checks['step3'] = true;
+        if (oldChecks['4']) s._checks['step4'] = true;
+        if (oldChecks['5']) s._checks['step5'] = true;
+        if (oldChecks['6']) s._checks['step6'] = true;
+      }
+      // Migrate step4a/step4b → step4, step5a/step5b → step5
+      if (s._checks['step4a'] !== undefined || s._checks['step4b'] !== undefined) {
+        s._checks['step4'] = s._checks['step4a'] || s._checks['step4b'] || false;
+        delete s._checks['step4a'];
+        delete s._checks['step4b'];
+      }
+      if (s._checks['step5a'] !== undefined || s._checks['step5b'] !== undefined) {
+        s._checks['step5'] = s._checks['step5a'] || s._checks['step5b'] || false;
+        delete s._checks['step5a'];
+        delete s._checks['step5b'];
+      }
+    }
+
+    // Migrate old panel names
+    if (s._panel === 'step4a' || s._panel === 'step4b') {
+      s._panel = 'step4';
+    }
+    if (s._panel === 'step5a' || s._panel === 'step5b') {
+      s._panel = 'step5';
+    }
 
     // Restore inputs
     document.querySelectorAll('input[type="text"], input[type="number"], select').forEach(el => {
@@ -1928,6 +2027,10 @@ function loadState() {
     // Restore training tool
     if (s._trainTool) selectTrainTool(s._trainTool);
     else selectTrainTool('postshot');
+
+    // Restore step4/step5 tools (after route, which sets defaults)
+    if (s._step4Tool) selectStep4Tool(s._step4Tool);
+    if (s._step5Tool) selectStep5Tool(s._step5Tool);
 
     // Restore panel
     if (s._panel) showPanel(s._panel);
