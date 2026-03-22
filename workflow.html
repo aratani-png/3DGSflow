@@ -608,6 +608,22 @@
     </div>
 
     <div class="card">
+      <h3>画像枚数の計算</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>フレーム数（手動入力）</label>
+          <input type="number" id="s3-frame-count" value="1010" min="1" oninput="calcSplitTotal()">
+        </div>
+        <div class="form-group">
+          <label>選択パターン</label>
+          <input type="text" id="s3-pattern-display" value="パターンA: 8枚/フレーム" readonly style="background:var(--bg); color:var(--text2);">
+        </div>
+      </div>
+      <div id="split-calc-result" style="margin-top:12px; padding:14px; background:var(--surface2); border-radius:var(--radius); font-size:0.9rem;">
+      </div>
+    </div>
+
+    <div class="card">
       <h3>出力仕様</h3>
       <table class="data-table" id="split-spec-table">
         <tr><th>項目</th><th>値</th></tr>
@@ -626,22 +642,6 @@
         <b>注意:</b> FFmpeg v360のyaw範囲は-180〜180。225→-135, 270→-90, 315→-45に内部変換が必要。
       </div>
       <div id="split-directions-detail" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="card">
-      <h3>画像枚数の計算</h3>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>フレーム数（手動入力）</label>
-          <input type="number" id="s3-frame-count" value="1010" min="1" oninput="calcSplitTotal()">
-        </div>
-        <div class="form-group">
-          <label>選択パターン</label>
-          <input type="text" id="s3-pattern-display" value="パターンA: 8枚/フレーム" readonly style="background:var(--bg); color:var(--text2);">
-        </div>
-      </div>
-      <div id="split-calc-result" style="margin-top:12px; padding:14px; background:var(--surface2); border-radius:var(--radius); font-size:0.9rem;">
-      </div>
     </div>
 
     <div class="card">
