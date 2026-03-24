@@ -6,9 +6,15 @@ LichtFeld Studioが読み込めるCOLMAP形式 (Y-up) に変換する。
 座標変換:
   Metashape: Z-up, c2w
   COLMAP/LichtFeld: Y-up, w2c
-  変換行列 S = [[1,0,0],[0,0,-1],[0,1,0]]
-  位置: (x,y,z) → (x,-z,y)
-  回転: R_c2w_yup = S @ R_c2w_zup → R_w2c = R_c2w_yup^T
+
+変換手順:
+  1. Region回転で軸整列: R_align = R_region^T
+  2. Z-up → Y-up: S = [[1,0,0],[0,0,1],[0,-1,0]]
+  3. 合成: M = S @ R_align
+  4. カメラ: R_c2w_yup = M @ R_c2w, C_yup = M @ (C - center)
+  5. PLY頂点: p_yup = M @ (p - center)
+
+検証: LichtFeld Studioで正しく読み込めることを確認済み (2026-03-23).
 
 使い方:
   python xml_to_colmap.py --xml camera.xml --ply points.ply --images ./perspective --output ./colmap
@@ -26,8 +32,8 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 
-# Z-up → Y-up 変換行列
-S_ZUP_TO_YUP = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]], dtype=np.float64)
+# Z-up → Y-up 変換行列 (Z→+Y, Y→-Z)
+S_ZUP_TO_YUP = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]], dtype=np.float64)
 
 
 def _rot_to_quat(R: np.ndarray) -> tuple[float, float, float, float]:
@@ -51,10 +57,16 @@ def _rot_to_quat(R: np.ndarray) -> tuple[float, float, float, float]:
                 (R[1, 2] + R[2, 1]) / s, 0.25 * s)
 
 
-def _convert_ply_zup_to_yup(src: str, dst: str) -> int:
-    """PLYの全頂点をZ-up→Y-upに変換する.
+def _convert_ply(src: str, dst: str, M: np.ndarray, center: np.ndarray) -> int:
+    """PLYの全頂点をM行列で変換する.
 
-    対応フォーマット: binary_little_endian, x y z nx ny nz r g b (27 bytes/vertex).
+    対応フォーマット: binary_little_endian, x y z nx ny nz r g b.
+
+    Args:
+        src: 入力PLYパス.
+        dst: 出力PLYパス.
+        M: 3x3変換行列 (region整列 + Y-up).
+        center: region centerオフセット.
 
     Returns:
         変換した頂点数.
@@ -75,7 +87,6 @@ def _convert_ply_zup_to_yup(src: str, dst: str) -> int:
             if l.startswith("element vertex"):
                 vertex_count = int(l.split()[-1])
 
-        # float x,y,z,nx,ny,nz + uchar r,g,b = 27 bytes
         props = [l for l in header_lines if l.startswith("property")]
         float_props = sum(1 for p in props if "float" in p)
         uchar_props = sum(1 for p in props if "uchar" in p)
@@ -88,11 +99,13 @@ def _convert_ply_zup_to_yup(src: str, dst: str) -> int:
                 vals = list(struct.unpack(f"<{float_props}f", data[: float_props * 4]))
                 rgb = data[float_props * 4:]
 
-                # Position: (x,y,z) → (x,-z,y)
-                vals[0], vals[1], vals[2] = vals[0], -vals[2], vals[1]
-                # Normals (if present): (nx,ny,nz) → (nx,-nz,ny)
+                # Position
+                p = M @ (np.array(vals[:3]) - center)
+                vals[0], vals[1], vals[2] = p[0], p[1], p[2]
+                # Normals (if present)
                 if float_props >= 6:
-                    vals[3], vals[4], vals[5] = vals[3], -vals[5], vals[4]
+                    n = M @ np.array(vals[3:6])
+                    vals[3], vals[4], vals[5] = n[0], n[1], n[2]
 
                 fout.write(struct.pack(f"<{float_props}f", *vals))
                 fout.write(rgb)
@@ -121,6 +134,23 @@ def generate_colmap(
 
     tree = ET.parse(xml_path)
     root = tree.getroot()
+
+    # Region整列: chunk座標を軸整列して正立させる
+    region = root.find(".//region")
+    if region is not None and region.find("R") is not None:
+        R_region = np.array(
+            list(map(float, region.find("R").text.strip().split()))
+        ).reshape(3, 3)
+        center = np.array(
+            list(map(float, region.find("center").text.strip().split()))
+        )
+        R_align = R_region.T
+    else:
+        R_align = np.eye(3)
+        center = np.zeros(3)
+
+    # 合成変換: region整列 + Z-up→Y-up
+    M = S_ZUP_TO_YUP @ R_align
 
     # Calibration (adjusted優先、なければinitial)
     sensor = root.find(".//sensors/sensor")
@@ -157,9 +187,9 @@ def generate_colmap(
         ])
         C_zup = np.array([vals[3], vals[7], vals[11]])
 
-        # Z-up → Y-up
-        R_c2w_yup = S_ZUP_TO_YUP @ R_c2w_zup
-        C_yup = S_ZUP_TO_YUP @ C_zup
+        # Region整列 + Y-up
+        R_c2w_yup = M @ R_c2w_zup
+        C_yup = M @ (C_zup - center)
 
         # w2c
         R_w2c = R_c2w_yup.T
@@ -193,10 +223,10 @@ def generate_colmap(
         fout.write("#   POINT3D_ID, X, Y, Z, R, G, B, ERROR, TRACK[] as (IMAGE_ID, POINT2D_IDX)\n")
         fout.write("# Number of points: 0\n")
 
-    # PLY: Z-up → Y-up 変換
+    # PLY変換 (region整列 + Y-up)
     ply_dst = os.path.join(colmap_dir, "points3D.ply")
-    print("PLYをY-upに変換中...")
-    vtx_count = _convert_ply_zup_to_yup(ply_path, ply_dst)
+    print("PLYを変換中 (region整列 + Y-up)...")
+    vtx_count = _convert_ply(ply_path, ply_dst, M, center)
     print(f"  {vtx_count} 頂点変換完了")
 
     # Junction for images

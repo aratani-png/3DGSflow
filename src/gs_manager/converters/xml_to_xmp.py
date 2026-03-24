@@ -2,15 +2,17 @@
 
 回転行列の座標変換:
   Metashape: Z-up, c2w, OpenCV camera (X-right, Y-down, Z-forward)
-  RS XMP:    Y-up, c2w, OpenGL-like camera (X-right, Y-up, Z-backward)
+  RS XMP:    Y-up, w2c (転置して格納)
 
-変換: R_rs = S' @ R_c2w @ R_yaw
-  S' = [[1,0,0],[0,0,-1],[0,1,0]]  (Z-up→Y-up + camera frame flip)
-  → row0 = R_c2w[0]
-  → row1 = -R_c2w[2]
-  → row2 = R_c2w[1]
+変換手順:
+  1. c2w にカメラローカルyaw回転を適用: R = R_c2w @ R_yaw
+  2. Z-up→Y-up (Pattern I): R_yup = [R[0], -R[2], R[1]]
+  3. 転置してw2cに変換: R_xmp = R_yup^T
 
-診断スクリプト tools/diagnose_rotation.py の Pattern I で確認済み.
+位置:
+  (x, y, z) → (x, -z, y)
+
+検証: project04で RS align 成功を確認済み (2026-03-23).
 """
 
 from __future__ import annotations
@@ -74,23 +76,28 @@ def _rotation_yaw(yaw_deg: float) -> list:
 
 
 # ============================================================
-# 座標変換: Metashape Z-up c2w → RS Y-up c2w
+# 座標変換: Metashape Z-up c2w → RS XMP w2c (Y-up)
 # ============================================================
 def _convert_rotation(R_c2w: list, yaw_deg: float) -> list:
-    """c2w回転行列をMetashape座標系からRS座標系に変換する.
+    """c2w回転行列をMetashape座標系からRS XMP形式(w2c, Y-up)に変換する.
 
     1. カメラローカルでyaw回転を適用
-    2. Z-up→Y-up + カメラフレーム変換 (Pattern I)
-       row0 =  R[0]  (X軸そのまま)
-       row1 = -R[2]  (Z-up の Z軸 → Y-up の -Y軸方向)
-       row2 =  R[1]  (Z-up の Y軸 → Y-up の Z軸方向)
+    2. Z-up→Y-up (Pattern I): row0=R[0], row1=-R[2], row2=R[1]
+    3. 転置してw2cに変換（RS XMPはw2cを格納する）
     """
     R_split = _rotation_yaw(yaw_deg)
     R = _mat_mul(R_c2w, R_split)
-    return [
+    # Pattern I: c2w in Y-up
+    R_yup = [
         R[0],
         [-R[2][0], -R[2][1], -R[2][2]],
         R[1],
+    ]
+    # Transpose to w2c
+    return [
+        [R_yup[0][0], R_yup[1][0], R_yup[2][0]],
+        [R_yup[0][1], R_yup[1][1], R_yup[2][1]],
+        [R_yup[0][2], R_yup[1][2], R_yup[2][2]],
     ]
 
 
