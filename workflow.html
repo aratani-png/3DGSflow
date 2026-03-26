@@ -604,6 +604,51 @@
     <div class="note note-warn">
       <b>容量注意:</b> 1フレーム約10-15MBになります。1000フレームで約10-15GB必要です。
     </div>
+
+    <div class="card">
+      <h3>ぶれフレーム除去（推奨）</h3>
+      <p style="font-size:0.82rem; color:var(--text2); margin-bottom:10px;">
+        動画から抽出したフレームにはぶれた画像が含まれます。
+        <b>Extract_sharpest_frame</b>（kotohibi氏）で動画から直接シャープなフレームのみ抽出するか、
+        抽出後にLaplacianフィルタで間引くことを推奨します。
+      </p>
+
+      <div class="substep">
+        <span class="substep-num">1-A</span>
+        <div class="substep-content">
+          <div class="substep-title">方法A: 動画から直接シャープフレーム抽出
+            <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('Extract_sharpest_frameで動画からシャープなフレームのみ抽出してください。chunk-size=30（30フレームに1枚）、jpeg-quality=95。', this)">Copy</button>
+          </div>
+          <div class="substep-desc">
+            <code>tools/Extract_sharpest_frame/</code> を使用。N フレームごとに最もシャープな1枚を自動選択。
+          </div>
+          <div class="code-wrap">
+            <div class="code-block" id="cmd-s1-sharp">python extract_sharpest_frame.py --video input.mp4 --chunk-size 30 --output-dir images_S --jpeg-quality 95</div>
+            <button class="copy-btn" onclick="copyCode('cmd-s1-sharp')">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <span class="substep-num">1-B</span>
+        <div class="substep-content">
+          <div class="substep-title">方法B: 抽出済みフレームのぶれ解析
+            <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('全天球画像のシャープネスを解析し、ぶれフレームを間引いてください。Laplacian分散で計測。', this)">Copy</button>
+          </div>
+          <div class="substep-desc">
+            Laplacianの分散でシャープネスをスコア化し、閾値以下を除外。
+          </div>
+          <div class="code-wrap">
+            <div class="code-block" id="cmd-s1-blur"># 解析のみ（削除しない）
+python filter_blurry.py --input images_S --analyze
+
+# 閾値300以下をbackupに移動
+python filter_blurry.py --input images_S --threshold 300 --move images_S_backup</div>
+            <button class="copy-btn" onclick="copyCode('cmd-s1-blur')">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ==================== STEP 2: Metashape全天球Sphericalアライメント (all routes) ==================== -->
@@ -889,14 +934,31 @@
         <div class="substep">
           <span class="substep-num">4-2</span>
           <div class="substep-content">
-            <div class="substep-title">画像の間引き
-              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('透視投影画像から人物や動いている物体が映っている画像を間引いてください。間引いた後、対応するXMPサイドカーファイルも削除してください。', this)">Copy</button>
+            <div class="substep-title">画像の間引き（ぶれ + 動的オブジェクト）
+              <button class="copy-btn-inline" onclick="event.stopPropagation();copyText('透視投影画像からぶれ画像と人物・動的オブジェクトを間引いてください。filter_blurry.pyでシャープネス解析→閾値以下を移動。XMPも同時処理されます。', this)">Copy</button>
             </div>
             <div class="substep-desc">
-              透視投影画像から人物や動いている物体が映っている画像を間引きます。間引いた画像に対応するXMPファイルも削除します。
+              透視投影画像のぶれと動的オブジェクトを間引きます。XMPも同時に処理されます。
             </div>
+
+            <h4 style="margin-top:10px;">ぶれフィルタリング（自動）</h4>
+            <div class="code-wrap">
+              <div class="code-block" id="cmd-s4-blur"># 1. シャープネス解析（まず確認）
+python tools/filter_blurry.py --input images_P --analyze --csv sharpness.csv
+
+# 2. 閾値以下をbackupに移動（XMPも同時）
+python tools/filter_blurry.py --input images_P --threshold 100 --move images_P_backup
+
+# 3. dry-runで確認してから実行
+python tools/filter_blurry.py --input images_P --threshold 100 --dry-run</div>
+              <button class="copy-btn" onclick="copyCode('cmd-s4-blur')">Copy</button>
+            </div>
+
             <div class="note note-warn" style="margin-top:8px;">
-              <b>注意:</b> 動的オブジェクト（人物、車両など）が3DGS品質を下げるため、事前に間引くことを推奨します。
+              <b>注意:</b> ぶれ画像と動的オブジェクト（人物、車両など）は3DGS品質を下げます。間引いた後、対応するXMPも自動削除されます。
+            </div>
+            <div class="note note-green" style="margin-top:8px;">
+              <b>推奨:</b> まず <code>--analyze</code> でスコア分布を確認し、適切な閾値を決めてから間引く。
             </div>
           </div>
         </div>
